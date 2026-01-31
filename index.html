@@ -199,6 +199,9 @@
         updateDisplay();
     }
 
+    // グローバルスコープから呼べるように明示的に公開
+    window.performClick = performClick;
+
     function buyItem(id, cost) {
         if (gameData.pts < cost) return;
 
