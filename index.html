@@ -2,8 +2,6 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-
-    <!-- ★ 画面拡大防止（最重要） -->
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -124,108 +122,144 @@
 <div class="save-msg" id="save-msg"></div>
 
 <div class="shop">
-    <div class="item unlocked" id="item1">木刀<br><small>Click +1</small><button onclick="buyItem(1,50)">50 G</button></div>
-    <div class="item" id="item2">見習い召喚師<br><small>Auto +2/s</small><button onclick="buyItem(2,200)">200 G</button></div>
-    <div class="item" id="item3">銀の剣<br><small>Click +10</small><button onclick="buyItem(3,800)">800 G</button></div>
-    <div class="item" id="item4">ドラゴンの巣<br><small>Auto +50/s</small><button onclick="buyItem(4,5000)">5000 G</button></div>
+    <div class="item unlocked" id="item1">
+        木刀<br><small>Click +1</small>
+        <button onclick="buyItem(1,50)">50 G</button>
+    </div>
+    <div class="item" id="item2">
+        見習い召喚師<br><small>Auto +2/s</small>
+        <button onclick="buyItem(2,200)">200 G</button>
+    </div>
+    <div class="item" id="item3">
+        銀の剣<br><small>Click +10</small>
+        <button onclick="buyItem(3,800)">800 G</button>
+    </div>
+    <div class="item" id="item4">
+        ドラゴンの巣<br><small>Auto +50/s</small>
+        <button onclick="buyItem(4,5000)">5000 G</button>
+    </div>
 </div>
 
-<!-- 🔊 効果音 -->
-<audio id="click-sound" src="data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
-<audio id="buy-sound" src="data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
-
 <script>
-    let gameData = {
-        pts: 0,
-        xp: 0,
-        level: 1,
-        power: 1,
-        autoAmount: 0
-    };
+/* ========= ゲームデータ ========= */
+let gameData = {
+    pts: 0,
+    xp: 0,
+    level: 1,
+    power: 1,
+    autoAmount: 0
+};
 
-    const clickSound = document.getElementById("click-sound");
-    const buySound = document.getElementById("buy-sound");
+/* ========= 効果音（Web Audio API） ========= */
+let audioCtx;
 
-    const pts = document.getElementById("pts");
-    const level = document.getElementById("level");
-    const xpBar = document.getElementById("xp-bar");
-    const item2 = document.getElementById("item2");
-    const item3 = document.getElementById("item3");
-    const item4 = document.getElementById("item4");
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
 
-    function playSound(sound) {
-        sound.currentTime = 0;
-        sound.play().catch(()=>{});
+function playClickSound() {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "square";
+    osc.frequency.value = 700;
+    gain.gain.value = 0.05;
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.05);
+}
+
+function playBuySound() {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "triangle";
+    osc.frequency.value = 350;
+    gain.gain.value = 0.07;
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.15);
+}
+
+/* ========= セーブ & ロード ========= */
+function saveGame() {
+    localStorage.setItem("clickerSave", JSON.stringify(gameData));
+    const msg = document.getElementById("save-msg");
+    msg.innerText = "Game Saved!";
+    setTimeout(() => msg.innerText = "", 2000);
+}
+
+function loadGame() {
+    const saved = localStorage.getItem("clickerSave");
+    if (saved) gameData = JSON.parse(saved);
+    updateDisplay();
+}
+
+/* ========= ゲーム処理 ========= */
+function getNextXP(lv) {
+    return Math.floor(100 * Math.pow(1.5, lv - 1));
+}
+
+function updateDisplay() {
+    let need = getNextXP(gameData.level);
+    while (gameData.xp >= need) {
+        gameData.xp -= need;
+        gameData.level++;
+        need = getNextXP(gameData.level);
     }
 
-    function saveGame() {
-        localStorage.setItem("clickerSave", JSON.stringify(gameData));
-        const msg = document.getElementById("save-msg");
-        msg.innerText = "Game Saved!";
-        setTimeout(()=>msg.innerText="",2000);
-    }
+    document.getElementById("pts").innerText = Math.floor(gameData.pts);
+    document.getElementById("level").innerText = gameData.level;
+    document.getElementById("xp-bar").style.width =
+        (gameData.xp / need * 100) + "%";
 
-    function loadGame() {
-        const saved = localStorage.getItem("clickerSave");
-        if (saved) gameData = JSON.parse(saved);
+    if (gameData.level >= 3) item2.classList.add("unlocked");
+    if (gameData.level >= 5) item3.classList.add("unlocked");
+    if (gameData.level >= 10) item4.classList.add("unlocked");
+}
+
+function performClick() {
+    gameData.pts += gameData.power;
+    gameData.xp += gameData.power * 2;
+    playClickSound();
+    updateDisplay();
+}
+
+function buyItem(id, cost) {
+    if (gameData.pts < cost) return;
+
+    gameData.pts -= cost;
+    if (id === 1) gameData.power += 1;
+    if (id === 2) gameData.autoAmount += 2;
+    if (id === 3) gameData.power += 10;
+    if (id === 4) gameData.autoAmount += 50;
+
+    playBuySound();
+    updateDisplay();
+    saveGame();
+}
+
+/* ========= 自動加算 ========= */
+setInterval(() => {
+    if (gameData.autoAmount > 0) {
+        gameData.pts += gameData.autoAmount;
+        gameData.xp += gameData.autoAmount * 0.1;
         updateDisplay();
     }
+}, 1000);
 
-    function getNextXP(lv) {
-        return Math.floor(100 * Math.pow(1.5, lv - 1));
-    }
-
-    function updateDisplay() {
-        let need = getNextXP(gameData.level);
-        while (gameData.xp >= need) {
-            gameData.xp -= need;
-            gameData.level++;
-            need = getNextXP(gameData.level);
-        }
-
-        pts.innerText = Math.floor(gameData.pts);
-        level.innerText = gameData.level;
-        xpBar.style.width = (gameData.xp / need * 100) + "%";
-
-        if (gameData.level >= 3) item2.classList.add("unlocked");
-        if (gameData.level >= 5) item3.classList.add("unlocked");
-        if (gameData.level >= 10) item4.classList.add("unlocked");
-    }
-
-    function performClick() {
-        gameData.pts += gameData.power;
-        gameData.xp += gameData.power * 2;
-        playSound(clickSound);
-        updateDisplay();
-    }
-
-    // グローバルスコープから呼べるように明示的に公開
-    window.performClick = performClick;
-
-    function buyItem(id, cost) {
-        if (gameData.pts < cost) return;
-
-        gameData.pts -= cost;
-        if (id === 1) gameData.power += 1;
-        if (id === 2) gameData.autoAmount += 2;
-        if (id === 3) gameData.power += 10;
-        if (id === 4) gameData.autoAmount += 50;
-
-        playSound(buySound);
-        updateDisplay();
-        saveGame();
-    }
-
-    setInterval(()=>{
-        if (gameData.autoAmount > 0) {
-            gameData.pts += gameData.autoAmount;
-            gameData.xp += gameData.autoAmount * 0.1;
-            updateDisplay();
-        }
-    },1000);
-
-    setInterval(saveGame,30000);
-    loadGame();
+setInterval(saveGame, 30000);
+loadGame();
 </script>
 
 </body>
