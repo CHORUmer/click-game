@@ -146,6 +146,13 @@
     const clickSound = document.getElementById("click-sound");
     const buySound = document.getElementById("buy-sound");
 
+    const pts = document.getElementById("pts");
+    const level = document.getElementById("level");
+    const xpBar = document.getElementById("xp-bar");
+    const item2 = document.getElementById("item2");
+    const item3 = document.getElementById("item3");
+    const item4 = document.getElementById("item4");
+
     function playSound(sound) {
         sound.currentTime = 0;
         sound.play().catch(()=>{});
@@ -178,7 +185,7 @@
 
         pts.innerText = Math.floor(gameData.pts);
         level.innerText = gameData.level;
-        xp-bar.style.width = (gameData.xp / need * 100) + "%";
+        xpBar.style.width = (gameData.xp / need * 100) + "%";
 
         if (gameData.level >= 3) item2.classList.add("unlocked");
         if (gameData.level >= 5) item3.classList.add("unlocked");
