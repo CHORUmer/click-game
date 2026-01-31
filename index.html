@@ -2,147 +2,221 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+
+    <!-- ★ 画面拡大防止（最重要） -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>RPGクリッカー：セーブ＆進化</title>
+
     <style>
-        body { text-align: center; font-family: sans-serif; background-color: #121212; color: #e0e0e0; padding: 20px; }
-        .header { display: flex; justify-content: space-around; background: #1e1e1e; padding: 15px; border-radius: 15px; margin-bottom: 20px; }
+        * {
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        body {
+            text-align: center;
+            font-family: sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            padding: 20px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-around;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
         .stat-box { display: flex; flex-direction: column; }
+
         .xp-value { font-size: 24px; color: #3498db; font-weight: bold; }
         .money-value { font-size: 24px; color: #f1c40f; font-weight: bold; }
-        #xp-bar-container { width: 200px; height: 10px; background: #333; border-radius: 5px; margin: 5px auto; }
-        #xp-bar { width: 0%; height: 100%; background: #3498db; transition: 0.3s; }
 
-        .main-btn { 
-            width: 150px; height: 150px; border-radius: 50%; border: none;
-            background: #2980b9; color: white; font-size: 20px; cursor: pointer; margin: 20px;
+        #xp-bar-container {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            margin: 5px auto;
         }
+
+        #xp-bar {
+            width: 0%;
+            height: 100%;
+            background: #3498db;
+            transition: 0.3s;
+        }
+
+        .main-btn {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: none;
+            background: #2980b9;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            margin: 20px;
+        }
+
         .main-btn:active { transform: scale(0.95); }
 
-        .shop { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; max-width: 800px; margin: 0 auto; }
-        .item { background: #1e1e1e; padding: 15px; border-radius: 12px; border: 1px solid #444; display: none; } /* 初期は非表示 */
-        .item.unlocked { display: block; } /* アンロックで表示 */
-        button { width: 100%; padding: 8px; margin-top: 10px; cursor: pointer; background: #27ae60; color: white; border: none; border-radius: 5px; }
+        .shop {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .item {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #444;
+            display: none;
+        }
+
+        .item.unlocked { display: block; }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
         button:disabled { background: #555; }
-        .save-msg { color: #2ecc71; font-size: 12px; height: 15px; margin-top: 10px; }
+
+        .save-msg {
+            color: #2ecc71;
+            font-size: 12px;
+            height: 15px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="stat-box">
-            <span style="font-size: 12px;">PLAYER LEVEL</span>
-            <span class="xp-value">Lv. <span id="level">1</span></span>
-            <div id="xp-bar-container"><div id="xp-bar"></div></div>
-        </div>
-        <div class="stat-box">
-            <span style="font-size: 12px;">MONEY</span>
-            <span class="money-value"><span id="pts">0</span> G</span>
-        </div>
+<div class="header">
+    <div class="stat-box">
+        <span style="font-size:12px;">PLAYER LEVEL</span>
+        <span class="xp-value">Lv. <span id="level">1</span></span>
+        <div id="xp-bar-container"><div id="xp-bar"></div></div>
     </div>
-
-    <button class="main-btn" onclick="performClick()">CLICK!</button>
-    <div class="save-msg" id="save-msg"></div>
-
-    <div class="shop" id="shop-container">
-        <!-- Lv.1から解放 -->
-        <div class="item unlocked" id="item1">木刀<br><small>Click +1</small><button onclick="buyItem(1, 50)">50 G</button></div>
-        <!-- Lv.3から解放 -->
-        <div class="item" id="item2">見習い召喚師<br><small>Auto +2/s</small><button onclick="buyItem(2, 200)">200 G</button></div>
-        <!-- Lv.5から解放 -->
-        <div class="item" id="item3">銀の剣<br><small>Click +10</small><button onclick="buyItem(3, 800)">800 G</button></div>
-        <!-- Lv.10から解放 -->
-        <div class="item" id="item4">ドラゴンの巣<br><small>Auto +50/s</small><button onclick="buyItem(4, 5000)">5000 G</button></div>
+    <div class="stat-box">
+        <span style="font-size:12px;">MONEY</span>
+        <span class="money-value"><span id="pts">0</span> G</span>
     </div>
+</div>
 
-    <script>
-        // ゲームデータ
-        let gameData = {
-            pts: 0,
-            xp: 0,
-            level: 1,
-            power: 1,
-            autoAmount: 0
-        };
+<button class="main-btn" onclick="performClick()">CLICK!</button>
+<div class="save-msg" id="save-msg"></div>
 
-        // セーブ機能 (localStorage)
-        function saveGame() {
-            localStorage.setItem('clickerSave', JSON.stringify(gameData));
-            const msg = document.getElementById('save-msg');
-            msg.innerText = "Game Saved!";
-            setTimeout(() => msg.innerText = "", 2000);
+<div class="shop">
+    <div class="item unlocked" id="item1">木刀<br><small>Click +1</small><button onclick="buyItem(1,50)">50 G</button></div>
+    <div class="item" id="item2">見習い召喚師<br><small>Auto +2/s</small><button onclick="buyItem(2,200)">200 G</button></div>
+    <div class="item" id="item3">銀の剣<br><small>Click +10</small><button onclick="buyItem(3,800)">800 G</button></div>
+    <div class="item" id="item4">ドラゴンの巣<br><small>Auto +50/s</small><button onclick="buyItem(4,5000)">5000 G</button></div>
+</div>
+
+<!-- 🔊 効果音 -->
+<audio id="click-sound" src="data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+<audio id="buy-sound" src="data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+
+<script>
+    let gameData = {
+        pts: 0,
+        xp: 0,
+        level: 1,
+        power: 1,
+        autoAmount: 0
+    };
+
+    const clickSound = document.getElementById("click-sound");
+    const buySound = document.getElementById("buy-sound");
+
+    function playSound(sound) {
+        sound.currentTime = 0;
+        sound.play().catch(()=>{});
+    }
+
+    function saveGame() {
+        localStorage.setItem("clickerSave", JSON.stringify(gameData));
+        const msg = document.getElementById("save-msg");
+        msg.innerText = "Game Saved!";
+        setTimeout(()=>msg.innerText="",2000);
+    }
+
+    function loadGame() {
+        const saved = localStorage.getItem("clickerSave");
+        if (saved) gameData = JSON.parse(saved);
+        updateDisplay();
+    }
+
+    function getNextXP(lv) {
+        return Math.floor(100 * Math.pow(1.5, lv - 1));
+    }
+
+    function updateDisplay() {
+        let need = getNextXP(gameData.level);
+        while (gameData.xp >= need) {
+            gameData.xp -= need;
+            gameData.level++;
+            need = getNextXP(gameData.level);
         }
 
-        // ロード機能
-        function loadGame() {
-            const saved = localStorage.getItem('clickerSave');
-            if (saved) {
-                gameData = JSON.parse(saved);
-                updateDisplay();
-            }
-        }
+        pts.innerText = Math.floor(gameData.pts);
+        level.innerText = gameData.level;
+        xp-bar.style.width = (gameData.xp / need * 100) + "%";
 
-        function getNextXP(lv) { return Math.floor(100 * Math.pow(1.5, lv - 1)); }
+        if (gameData.level >= 3) item2.classList.add("unlocked");
+        if (gameData.level >= 5) item3.classList.add("unlocked");
+        if (gameData.level >= 10) item4.classList.add("unlocked");
+    }
 
-        function updateDisplay() {
-            let needed = getNextXP(gameData.level);
-            while (gameData.xp >= needed) {
-                gameData.xp -= needed;
-                gameData.level++;
-                needed = getNextXP(gameData.level);
-            }
+    function performClick() {
+        gameData.pts += gameData.power;
+        gameData.xp += gameData.power * 2;
+        playSound(clickSound);
+        updateDisplay();
+    }
 
-            document.getElementById('pts').innerText = Math.floor(gameData.pts);
-            document.getElementById('level').innerText = gameData.level;
-            document.getElementById('xp-bar').style.width = (gameData.xp / needed * 100) + "%";
+    function buyItem(id, cost) {
+        if (gameData.pts < cost) return;
 
-            // ショップのアンロック判定
-            if (gameData.level >= 3) document.getElementById('item2').classList.add('unlocked');
-            if (gameData.level >= 5) document.getElementById('item3').classList.add('unlocked');
-            if (gameData.level >= 10) document.getElementById('item4').classList.add('unlocked');
+        gameData.pts -= cost;
+        if (id === 1) gameData.power += 1;
+        if (id === 2) gameData.autoAmount += 2;
+        if (id === 3) gameData.power += 10;
+        if (id === 4) gameData.autoAmount += 50;
 
-            // 購入ボタンの有効化判定
-            const buttons = document.querySelectorAll('.shop button');
-            const costs = [50, 200, 800, 5000];
-            buttons.forEach((btn, idx) => {
-                btn.disabled = gameData.pts < costs[idx];
-            });
-        }
+        playSound(buySound);
+        updateDisplay();
+        saveGame();
+    }
 
-        function performClick() {
-            gameData.pts += gameData.power;
-            gameData.xp += gameData.power * 2;
+    setInterval(()=>{
+        if (gameData.autoAmount > 0) {
+            gameData.pts += gameData.autoAmount;
+            gameData.xp += gameData.autoAmount * 0.1;
             updateDisplay();
         }
+    },1000);
 
-        function buyItem(id, cost) {
-            if (gameData.pts >= cost) {
-                gameData.pts -= cost;
-                if (id === 1) gameData.power += 1;
-                if (id === 2) gameData.autoAmount += 2;
-                if (id === 3) gameData.power += 10;
-                if (id === 4) gameData.autoAmount += 50;
-                updateDisplay();
-                saveGame(); // 購入時にセーブ
-            }
-        }
+    setInterval(saveGame,30000);
+    loadGame();
+</script>
 
-        // 自動加算ループ
-        setInterval(() => {
-            if (gameData.autoAmount > 0) {
-                gameData.pts += gameData.autoAmount;
-                gameData.xp += gameData.autoAmount * 0.1;
-                updateDisplay();
-            }
-        }, 1000);
-
-        // 30秒ごとにオートセーブ
-        setInterval(saveGame, 30000);
-
-        // 起動時にロード
-        loadGame();
-    </script>
 </body>
 </html>
-
-
-
