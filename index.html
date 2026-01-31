@@ -187,7 +187,7 @@ function updateDisplay() {
 
     pts.innerText = format(gameData.pts);
     level.innerText = gameData.level;
-    xp-bar.style.width = (gameData.xp / need * 100) + "%";
+    document.getElementById("xp-bar").style.width = (gameData.xp / need * 100) + "%";
 
     if (gameData.level >= 3) item2.classList.add("unlocked");
     if (gameData.level >= 5) item3.classList.add("unlocked");
