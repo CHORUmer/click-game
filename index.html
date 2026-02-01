@@ -193,6 +193,13 @@ button.shop-btn {
   </div>
 </div>
 
+  <div class="item" id="item6">
+    両刃斧
+    <button onclick="buyItem(6,1500)">1500G</button>
+    <div class="desc">攻撃力 +10。強力な武器。Lv12で解禁。</div>
+  </div>
+</div>
+
 <script>
 let gameData = {
   pts: 0,
@@ -288,12 +295,14 @@ function updateDisplay(){
     document.getElementById("item2"), 
     document.getElementById("item3"),
     document.getElementById("item4"),
-    document.getElementById("item5")
+    document.getElementById("item5"),
+    document.getElementById("item6")
   ];
   
   if(gameData.level >= 3) items[1].classList.add("unlocked");
   if(gameData.level >= 5) items[2].classList.add("unlocked");
   if(gameData.level >= 10) items[3].classList.add("unlocked");
+  if(gameData.level >= 12) items[5].classList.add("unlocked");
   if(gameData.level >= 15) items[4].classList.add("unlocked");
   
   document.getElementById("boss-start-btn").disabled = gameData.level < 10;
@@ -403,6 +412,7 @@ function buyItem(id, cost){
     case 3: gameData.power += 3; break;
     case 4: gameData.autoAmount += 5; break;
     case 5: gameData.boostUntil = Date.now() + 10000; break;
+    case 6: gameData.power += 10; break;
   }
   updateDisplay();
 }
