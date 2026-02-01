@@ -143,6 +143,10 @@ button.shop-btn {
     <span>MONEY</span>
     <span class="money-value"><span id="pts">0</span> G</span>
   </div>
+  <div class="stat-box">
+    <span>REBIRTH</span>
+    <span class="xp-value">×<span id="rebirth-multiplier">1.0</span></span>
+  </div>
 </div>
 
 <button class="main-btn" onclick="performClick(event)">CLICK!</button>
@@ -294,6 +298,7 @@ function updateDisplay(){
   document.getElementById("pts").innerText = format(gameData.pts);
   document.getElementById("level").innerText = gameData.level;
   document.getElementById("xp-bar").style.width = (gameData.xp / need * 100) + "%";
+  document.getElementById("rebirth-multiplier").innerText = (1 + gameData.rebirth * 0.2).toFixed(1);
   
   const items = [
     document.getElementById("item1"),
