@@ -195,18 +195,21 @@ button.shop-btn {
 
 <script>
 let gameData = {
-  pts:0, xp:0, level:1,
-  power:1, autoAmount:0,
-  boostUntil:0,
-  rebirth:0
+  pts: 0,
+  xp: 0,
+  level: 1,
+  power: 1,
+  autoAmount: 0,
+  boostUntil: 0,
+  rebirth: 0
 };
 
 let bossData = {
-  active:false,
-  baseHp:1000,
-  hp:1000,
-  time:10,
-  timer:null
+  active: false,
+  baseHp: 1000,
+  hp: 1000,
+  time: 10,
+  timer: null
 };
 
 function saveGame(){
@@ -215,11 +218,20 @@ function saveGame(){
 
 function loadGame(){
   const s = localStorage.getItem("clickerSave");
-  if(s) gameData = JSON.parse(s);
+  if(s){
+    try{
+      gameData = Object.assign(gameData, JSON.parse(s));
+    }catch(e){
+      console.log("セーブデータ読み込みエラー:", e);
+    }
+  }
 }
 
-const format = n => Math.floor(n).toLocaleString();
-const getNextXP = lv => Math.floor(100*Math.pow(1.5,lv-1));
+const format = n => {
+  if(isNaN(n) || !isFinite(n)) return "0";
+  return Math.floor(n).toLocaleString();
+};
+const getNextXP = lv => Math.floor(100 * Math.pow(1.5, lv - 1));
 
 function updateDisplay(){
   let need = getNextXP(gameData.level);
@@ -228,127 +240,144 @@ function updateDisplay(){
     gameData.level++;
     need = getNextXP(gameData.level);
   }
+  
   document.getElementById("pts").innerText = format(gameData.pts);
   document.getElementById("level").innerText = gameData.level;
-  document.getElementById("xp-bar").style.width = (gameData.xp/need*100)+"%";
+  document.getElementById("xp-bar").style.width = (gameData.xp / need * 100) + "%";
   
-  const items = [document.getElementById("item1"), document.getElementById("item2"), 
-                 document.getElementById("item3"), document.getElementById("item4"), document.getElementById("item5")];
-  if(gameData.level>=3) items[1].classList.add("unlocked");
-  if(gameData.level>=5) items[2].classList.add("unlocked");
-  if(gameData.level>=10) items[3].classList.add("unlocked");
-  if(gameData.level>=15) items[4].classList.add("unlocked");
+  const items = [
+    document.getElementById("item1"),
+    document.getElementById("item2"), 
+    document.getElementById("item3"),
+    document.getElementById("item4"),
+    document.getElementById("item5")
+  ];
   
-  document.getElementById("boss-start-btn").disabled = gameData.level<10;
+  if(gameData.level >= 3) items[1].classList.add("unlocked");
+  if(gameData.level >= 5) items[2].classList.add("unlocked");
+  if(gameData.level >= 10) items[3].classList.add("unlocked");
+  if(gameData.level >= 15) items[4].classList.add("unlocked");
+  
+  document.getElementById("boss-start-btn").disabled = gameData.level < 10;
   saveGame();
 }
 
 function updateBuffDisplay(){
   const buffContainer = document.getElementById("buff-container");
-  buffContainer.innerHTML="";
-  if(gameData.boostUntil>Date.now()){
-    buffContainer.innerHTML=`<div class="buff"><span>Wブースト</span><span>${Math.ceil((gameData.boostUntil-Date.now())/1000)}s</span></div>`;
+  buffContainer.innerHTML = "";
+  if(gameData.boostUntil > Date.now()){
+    buffContainer.innerHTML = `<div class="buff"><span>Wブースト</span><span>${Math.ceil((gameData.boostUntil - Date.now()) / 1000)}s</span></div>`;
   }
 }
 
 function performClick(e){
-  const boost = Date.now()<gameData.boostUntil ? 2 : 1;
-  const gain = gameData.power * boost * (1+gameData.rebirth*0.2);
+  const boost = Date.now() < gameData.boostUntil ? 2 : 1;
+  const gain = Math.floor(gameData.power * boost * (1 + gameData.rebirth * 0.2));
 
   gameData.pts += gain;
-  gameData.xp += gain*2;
+  gameData.xp += gain * 2;
 
   const r = document.createElement("span");
-  r.className="ripple";
+  r.className = "ripple";
   const rect = e.currentTarget.getBoundingClientRect();
-  r.style.width=r.style.height=rect.width+"px";
-  r.style.left=(e.clientX-rect.left-rect.width/2)+"px";
-  r.style.top=(e.clientY-rect.top-rect.height/2)+"px";
+  r.style.width = r.style.height = rect.width + "px";
+  r.style.left = (e.clientX - rect.left - rect.width / 2) + "px";
+  r.style.top = (e.clientY - rect.top - rect.height / 2) + "px";
   e.currentTarget.appendChild(r);
-  setTimeout(()=>r.remove(),600);
+  setTimeout(() => r.remove(), 600);
 
   const g = document.createElement("div");
-  g.className="gain-text";
-  g.innerText="+"+format(gain)+" G";
-  g.style.left=e.clientX+"px";
-  g.style.top=e.clientY+"px";
+  g.className = "gain-text";
+  g.innerText = "+" + format(gain) + " G";
+  g.style.left = e.clientX + "px";
+  g.style.top = e.clientY + "px";
   document.body.appendChild(g);
-  setTimeout(()=>g.remove(),1000);
+  setTimeout(() => g.remove(), 1000);
 
   updateDisplay();
 }
 
 function startBoss(){
-  bossData.active=true;
-  bossData.hp = Math.floor(bossData.baseHp*(1+gameData.rebirth*0.5));
-  bossData.time = Math.max(5,10-gameData.rebirth);
-  document.getElementById("boss-area").style.display="block";
-  document.getElementById("boss-start-btn").disabled=true;
+  bossData.active = true;
+  bossData.baseHp = Math.max(1000, 1000 + gameData.rebirth * 500);
+  bossData.hp = bossData.baseHp;
+  bossData.time = Math.max(5, 10 - gameData.rebirth);
+  
+  document.getElementById("boss-area").style.display = "block";
+  document.getElementById("boss-start-btn").disabled = true;
 
   updateBossUI();
-  bossData.timer=setInterval(()=>{
+  
+  clearInterval(bossData.timer);
+  bossData.timer = setInterval(() => {
     bossData.time--;
     updateBossUI();
-    if(bossData.time<=0) endBoss(false);
-  },1000);
+    if(bossData.time <= 0) endBoss(false);
+  }, 1000);
 }
 
 function attackBoss(){
   if(!bossData.active) return;
-  const dmg = gameData.power*(1+gameData.rebirth*0.2);
+  const dmg = Math.floor(gameData.power * (1 + gameData.rebirth * 0.2));
   bossData.hp -= dmg;
-  if(bossData.hp<=0) endBoss(true);
+  if(bossData.hp <= 0) endBoss(true);
   updateBossUI();
 }
 
 function updateBossUI(){
-  document.getElementById("boss-hp-text").innerText =
-    `HP ${Math.max(0,Math.floor(bossData.hp))}`;
-  document.getElementById("boss-hp-bar").style.width =
-    Math.max(0,bossData.hp/(bossData.baseHp*(1+gameData.rebirth*0.5))*100)+"%";
-  document.getElementById("boss-timer").innerText = `残り ${bossData.time}s`;
+  const maxHp = Math.max(1000, 1000 + gameData.rebirth * 500);
+  const currentHp = Math.max(0, Math.floor(bossData.hp));
+  
+  document.getElementById("boss-hp-text").innerText = `HP ${format(currentHp)}/${format(maxHp)}`;
+  document.getElementById("boss-hp-bar").style.width = Math.max(0, (currentHp / maxHp * 100)) + "%";
+  document.getElementById("boss-timer").innerText = `残り ${Math.max(0, bossData.time)}s`;
   document.getElementById("boss-rank").innerText = `強化段階 ★${gameData.rebirth}`;
 }
 
 function endBoss(win){
   clearInterval(bossData.timer);
-  bossData.active=false;
-  document.getElementById("boss-area").style.display="none";
-  document.getElementById("boss-start-btn").disabled=false;
+  bossData.active = false;
+  document.getElementById("boss-area").style.display = "none";
+  document.getElementById("boss-start-btn").disabled = false;
+  
   if(win){
-    gameData.pts += 3000*(1+gameData.rebirth*0.2);
+    gameData.pts += Math.floor(3000 * (1 + gameData.rebirth * 0.2));
     gameData.xp += 500;
   }else{
-    gameData.pts = Math.max(0, gameData.pts-300);
+    gameData.pts = Math.max(0, gameData.pts - 300);
   }
   updateDisplay();
 }
 
-function buyItem(id,cost){
-  if(gameData.pts<cost){
+function buyItem(id, cost){
+  if(gameData.pts < cost){
     alert("お金が足りません");
     return;
   }
-  gameData.pts-=cost;
+  gameData.pts -= cost;
   switch(id){
-    case 1: gameData.power+=1; break;
-    case 2: gameData.autoAmount+=1; break;
-    case 3: gameData.power+=3; break;
-    case 4: gameData.autoAmount+=5; break;
-    case 5: gameData.boostUntil=Date.now()+10000; break;
+    case 1: gameData.power += 1; break;
+    case 2: gameData.autoAmount += 1; break;
+    case 3: gameData.power += 3; break;
+    case 4: gameData.autoAmount += 5; break;
+    case 5: gameData.boostUntil = Date.now() + 10000; break;
   }
   updateDisplay();
 }
 
+// 初期化処理
 loadGame();
 updateDisplay();
-setInterval(()=>{
-  if(gameData.autoAmount>0 && !bossData.active){
-    gameData.pts+=gameData.autoAmount;
+
+// 自動更新ループ
+setInterval(() => {
+  if(gameData.autoAmount > 0 && !bossData.active){
+    gameData.pts += gameData.autoAmount;
     updateDisplay();
   }
   updateBuffDisplay();
-},1000);
+}, 1000);
+
 window.addEventListener("beforeunload", saveGame);
 </script>
 
