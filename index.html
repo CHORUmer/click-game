@@ -295,7 +295,7 @@ function performClick(e){
   ripple.style.left=(e.clientX)+'px';
   ripple.style.top=(e.clientY)+'px';
   document.body.appendChild(ripple);
-  setTimeout(()=>ripple.remove(),600);
+  setTimeout(()=>ripple.remove(),300);
   
   /* +G表示 */
   const gainText=document.createElement('div');
@@ -314,7 +314,7 @@ function performClick(e){
 function startBoss(){
   bossData.active=true;
   bossData.hp=bossData.maxHp;
-  bossData.time=30;
+  bossData.time=10;
   bossAreaElem.style.display="block";
   bossStartBtnElem.disabled=true;
   playBossStartSound();
@@ -323,7 +323,7 @@ function startBoss(){
     bossData.time--;
     updateBossUI();
     if(bossData.time<=0) endBoss(false);
-  },1000);
+  },1200);
 }
 
 function attackBoss(e){
