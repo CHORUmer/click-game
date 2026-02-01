@@ -49,7 +49,6 @@ body {
   overflow: hidden;
 }
 
-/* 波紋 */
 .ripple {
   position: absolute;
   border-radius: 50%;
@@ -62,7 +61,6 @@ body {
   to { transform: scale(4); opacity: 0; }
 }
 
-/* +G表示 */
 .gain-text {
   position: absolute;
   color: #f1c40f;
@@ -92,6 +90,25 @@ body {
   justify-content: space-between;
 }
 
+.shop {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  max-width: 800px;
+  margin: 20px auto;
+}
+
+.item { background:#1e1e1e; padding:15px; border-radius:12px; display:none; }
+.item.unlocked { display:block; }
+.item button { margin-top:8px; cursor:pointer; padding:5px 10px; background:#2980b9; color:white; border:none; border-radius:5px; }
+
+.item .desc {
+  margin-top:8px;
+  font-size:13px;
+  color:#bdbdbd;
+  line-height:1.3;
+}
+
 #boss-area {
   display:none;
   background:#1e1e1e;
@@ -99,6 +116,17 @@ body {
   border-radius:15px;
   margin:15px auto;
   max-width:300px;
+}
+
+button.shop-btn {
+  margin-top:10px;
+  padding:10px 20px;
+  background:#2980b9;
+  color:white;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+  font-size:16px;
 }
 </style>
 </head>
@@ -120,7 +148,7 @@ body {
 <button class="main-btn" onclick="performClick(event)">CLICK!</button>
 <div id="buff-container"></div>
 
-<button onclick="startBoss()">⚔️ ボスに挑む</button>
+<button class="shop-btn" id="boss-start-btn" onclick="startBoss()">⚔️ ボスに挑む</button>
 
 <div id="boss-area">
   <h3>ゴブリン王</h3>
@@ -133,8 +161,39 @@ body {
   <button class="main-btn" style="background:#c0392b" onclick="attackBoss(event)">ATTACK!</button>
 </div>
 
+<div class="shop">
+  <div class="item unlocked" id="item1">
+    木刀
+    <button onclick="buyItem(1,50)">50G</button>
+    <div class="desc">攻撃力 +1。序盤の基本武器。</div>
+  </div>
+
+  <div class="item" id="item2">
+    見習い召喚師
+    <button onclick="buyItem(2,200)">200G</button>
+    <div class="desc">毎秒 +1G 自動生成。Lv3で解禁。</div>
+  </div>
+
+  <div class="item" id="item3">
+    銀の剣
+    <button onclick="buyItem(3,800)">800G</button>
+    <div class="desc">攻撃力 +3。中級武器。Lv5で解禁。</div>
+  </div>
+
+  <div class="item" id="item4">
+    ドラゴンの巣
+    <button onclick="buyItem(4,5000)">5000G</button>
+    <div class="desc">自動生成 +5。Lv10で解禁。</div>
+  </div>
+
+  <div class="item" id="item5">
+    Wブースト
+    <button onclick="buyItem(5,3000)">3000G</button>
+    <div class="desc">10秒間ダブルブースト。</div>
+  </div>
+</div>
+
 <script>
-/* ========= データ ========= */
 let gameData = {
   pts:0, xp:0, level:1,
   power:1, autoAmount:0,
@@ -150,16 +209,15 @@ let bossData = {
   timer:null
 };
 
-/* ========= セーブ ========= */
 function saveGame(){
   localStorage.setItem("clickerSave", JSON.stringify(gameData));
 }
+
 function loadGame(){
   const s = localStorage.getItem("clickerSave");
   if(s) gameData = JSON.parse(s);
 }
 
-/* ========= 表示 ========= */
 const format = n => Math.floor(n).toLocaleString();
 const getNextXP = lv => Math.floor(100*Math.pow(1.5,lv-1));
 
@@ -173,10 +231,26 @@ function updateDisplay(){
   document.getElementById("pts").innerText = format(gameData.pts);
   document.getElementById("level").innerText = gameData.level;
   document.getElementById("xp-bar").style.width = (gameData.xp/need*100)+"%";
+  
+  const items = [document.getElementById("item1"), document.getElementById("item2"), 
+                 document.getElementById("item3"), document.getElementById("item4"), document.getElementById("item5")];
+  if(gameData.level>=3) items[1].classList.add("unlocked");
+  if(gameData.level>=5) items[2].classList.add("unlocked");
+  if(gameData.level>=10) items[3].classList.add("unlocked");
+  if(gameData.level>=15) items[4].classList.add("unlocked");
+  
+  document.getElementById("boss-start-btn").disabled = gameData.level<10;
   saveGame();
 }
 
-/* ========= クリック ========= */
+function updateBuffDisplay(){
+  const buffContainer = document.getElementById("buff-container");
+  buffContainer.innerHTML="";
+  if(gameData.boostUntil>Date.now()){
+    buffContainer.innerHTML=`<div class="buff"><span>Wブースト</span><span>${Math.ceil((gameData.boostUntil-Date.now())/1000)}s</span></div>`;
+  }
+}
+
 function performClick(e){
   const boost = Date.now()<gameData.boostUntil ? 2 : 1;
   const gain = gameData.power * boost * (1+gameData.rebirth*0.2);
@@ -184,7 +258,6 @@ function performClick(e){
   gameData.pts += gain;
   gameData.xp += gain*2;
 
-  /* 波紋 */
   const r = document.createElement("span");
   r.className="ripple";
   const rect = e.currentTarget.getBoundingClientRect();
@@ -194,7 +267,6 @@ function performClick(e){
   e.currentTarget.appendChild(r);
   setTimeout(()=>r.remove(),600);
 
-  /* +G */
   const g = document.createElement("div");
   g.className="gain-text";
   g.innerText="+"+format(gain)+" G";
@@ -206,12 +278,12 @@ function performClick(e){
   updateDisplay();
 }
 
-/* ========= ボス ========= */
 function startBoss(){
   bossData.active=true;
   bossData.hp = Math.floor(bossData.baseHp*(1+gameData.rebirth*0.5));
   bossData.time = Math.max(5,10-gameData.rebirth);
   document.getElementById("boss-area").style.display="block";
+  document.getElementById("boss-start-btn").disabled=true;
 
   updateBossUI();
   bossData.timer=setInterval(()=>{
@@ -242,6 +314,7 @@ function endBoss(win){
   clearInterval(bossData.timer);
   bossData.active=false;
   document.getElementById("boss-area").style.display="none";
+  document.getElementById("boss-start-btn").disabled=false;
   if(win){
     gameData.pts += 3000*(1+gameData.rebirth*0.2);
     gameData.xp += 500;
@@ -251,9 +324,31 @@ function endBoss(win){
   updateDisplay();
 }
 
-/* ========= 初期化 ========= */
+function buyItem(id,cost){
+  if(gameData.pts<cost){
+    alert("お金が足りません");
+    return;
+  }
+  gameData.pts-=cost;
+  switch(id){
+    case 1: gameData.power+=1; break;
+    case 2: gameData.autoAmount+=1; break;
+    case 3: gameData.power+=3; break;
+    case 4: gameData.autoAmount+=5; break;
+    case 5: gameData.boostUntil=Date.now()+10000; break;
+  }
+  updateDisplay();
+}
+
 loadGame();
 updateDisplay();
+setInterval(()=>{
+  if(gameData.autoAmount>0 && !bossData.active){
+    gameData.pts+=gameData.autoAmount;
+    updateDisplay();
+  }
+  updateBuffDisplay();
+},1000);
 window.addEventListener("beforeunload", saveGame);
 </script>
 
