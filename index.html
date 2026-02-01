@@ -2,29 +2,27 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
- content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RPGクリッカー：完全版</title>
 
 <style>
 * { touch-action: manipulation; user-select: none; }
 
 body {
- text-align: center;
- font-family: sans-serif;
- background-color: #121212;
- color: #e0e0e0;
- padding: 20px;
+  text-align: center;
+  font-family: sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  padding: 20px;
 }
 
 .header {
- display: flex;
- justify-content: space-around;
- background: #1e1e1e;
- padding: 15px;
- border-radius: 15px;
- margin-bottom: 20px;
+  display: flex;
+  justify-content: space-around;
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 20px;
 }
 
 .stat-box { display: flex; flex-direction: column; }
@@ -32,87 +30,75 @@ body {
 .money-value { font-size: 24px; color: #f1c40f; font-weight: bold; }
 
 #xp-bar-container {
- width: 200px; height: 10px; background: #333;
- border-radius: 5px; margin: 5px auto;
+  width: 200px; height: 10px;
+  background: #333; border-radius: 5px;
+  margin: 5px auto;
 }
 #xp-bar { height: 100%; background: #3498db; transition: 0.3s; }
 
 .main-btn {
- position: relative;
- width: 150px; height: 150px;
- border-radius: 50%;
- border: none;
- background: #2980b9;
- color: white;
- font-size: 20px;
- margin: 15px;
- cursor: pointer;
- overflow: hidden;
+  position: relative;
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  border: none;
+  background: #2980b9;
+  color: white;
+  font-size: 20px;
+  margin: 15px;
+  cursor: pointer;
+  overflow: hidden;
 }
 
+/* 波紋 */
 .ripple {
- position: absolute;
- width: 150px;
- height: 150px;
- margin-left: -75px;
- margin-top: -75px;
- border-radius: 50%;
- background: rgba(255,255,255,0.4);
- transform: scale(0);
- pointer-events: none;
- animation: ripple 0.6s linear;
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
 }
-@keyframes ripple { to { transform: scale(4); opacity: 0; } }
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
 
+/* +G表示 */
 .gain-text {
- position: absolute;
- transform: translate(-50%, -50%);
- color: #f1c40f;
- font-weight: bold;
- animation: floatUp 1s ease-out forwards;
- pointer-events: none;
+  position: absolute;
+  color: #f1c40f;
+  font-weight: bold;
+  pointer-events: none;
+  animation: floatUp 1s ease-out forwards;
 }
 @keyframes floatUp {
- from { opacity: 1; transform: translate(-50%,0); }
- to { opacity: 0; transform: translate(-50%,-40px); }
+  from { opacity: 1; transform: translate(-50%,0); }
+  to { opacity: 0; transform: translate(-50%,-40px); }
 }
 
 #buff-container {
- max-width: 300px;
- margin: 10px auto;
- display: flex;
- flex-direction: column;
- gap: 8px;
+  max-width: 300px;
+  margin: 10px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .buff {
- background: #1e1e1e;
- border: 1px solid #555;
- border-radius: 8px;
- padding: 8px;
- display: flex;
- justify-content: space-between;
+  background: #1e1e1e;
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  justify-content: space-between;
 }
-
-.shop {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
- gap: 15px;
- max-width: 800px;
- margin: 20px auto;
-}
-
-.item { background:#1e1e1e; padding:15px; border-radius:12px; display:none; }
-.item.unlocked { display:block; }
-.item button { margin-top:8px; }
 
 #boss-area {
- display:none;
- background:#1e1e1e;
- padding:15px;
- border-radius:15px;
- margin:15px auto;
- max-width:300px;
+  display:none;
+  background:#1e1e1e;
+  padding:15px;
+  border-radius:15px;
+  margin:15px auto;
+  max-width:300px;
 }
 </style>
 </head>
@@ -120,174 +106,155 @@ body {
 <body>
 
 <div class="header">
- <div class="stat-box">
-   <span>LEVEL</span>
-   <span class="xp-value">Lv.<span id="level">1</span></span>
-   <div id="xp-bar-container"><div id="xp-bar"></div></div>
- </div>
- <div class="stat-box">
-   <span>MONEY</span>
-   <span class="money-value"><span id="pts">0</span> G</span>
- </div>
+  <div class="stat-box">
+    <span>LEVEL</span>
+    <span class="xp-value">Lv.<span id="level">1</span></span>
+    <div id="xp-bar-container"><div id="xp-bar"></div></div>
+  </div>
+  <div class="stat-box">
+    <span>MONEY</span>
+    <span class="money-value"><span id="pts">0</span> G</span>
+  </div>
 </div>
 
 <button class="main-btn" onclick="performClick(event)">CLICK!</button>
 <div id="buff-container"></div>
 
-<button id="boss-start-btn" onclick="startBoss()">⚔️ ボスに挑む</button>
+<button onclick="startBoss()">⚔️ ボスに挑む</button>
 
 <div id="boss-area">
- <h3>ゴブリン王</h3>
- <div id="boss-rank"></div>
- <div id="boss-hp-text"></div>
- <div style="background:#333;height:10px;border-radius:5px;">
-   <div id="boss-hp-bar" style="height:100%;background:#e74c3c;"></div>
- </div>
- <div id="boss-timer"></div>
- <button class="main-btn" style="background:#c0392b" onclick="attackBoss(event)">ATTACK!</button>
+  <h3>ゴブリン王</h3>
+  <div id="boss-rank"></div>
+  <div id="boss-hp-text"></div>
+  <div style="background:#333;height:10px;border-radius:5px;">
+    <div id="boss-hp-bar" style="height:100%;background:#e74c3c;"></div>
+  </div>
+  <div id="boss-timer"></div>
+  <button class="main-btn" style="background:#c0392b" onclick="attackBoss(event)">ATTACK!</button>
 </div>
 
 <script>
-let gameData={
- pts:0,xp:0,level:1,power:1,
- autoAmount:0,boostUntil:0,
- moneyBonus:0,rebirth:0
+/* ========= データ ========= */
+let gameData = {
+  pts:0, xp:0, level:1,
+  power:1, autoAmount:0,
+  boostUntil:0,
+  rebirth:0
 };
 
-let bossData={
- active:false,
- baseHp:1000,
- maxHp:1000,
- hp:1000,
- baseTime:10,
- time:10,
- timerId:null
+let bossData = {
+  active:false,
+  baseHp:1000,
+  hp:1000,
+  time:10,
+  timer:null
 };
 
-/* 効果音 */
-let audioCtx;
-function playSE(f,d=0.1){
- if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
- const o=audioCtx.createOscillator();
- const g=audioCtx.createGain();
- o.frequency.value=f;
- g.gain.setValueAtTime(0.08,audioCtx.currentTime);
- g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+d);
- o.connect(g); g.connect(audioCtx.destination);
- o.start(); o.stop(audioCtx.currentTime+d);
+/* ========= セーブ ========= */
+function saveGame(){
+  localStorage.setItem("clickerSave", JSON.stringify(gameData));
+}
+function loadGame(){
+  const s = localStorage.getItem("clickerSave");
+  if(s) gameData = JSON.parse(s);
 }
 
-const playClickSound=()=>playSE(700,0.05);
-const playAttackSound=()=>playSE(900,0.04);
-const playBossStartSound=()=>playSE(180,0.4);
-const playBossWinSound=()=>playSE(1200,0.4);
-const playBossLoseSound=()=>playSE(120,0.5);
-
-/* 表示 */
-const format=n=>Math.floor(n).toLocaleString();
-const getNextXP=lv=>Math.floor(100*Math.pow(1.5,lv-1));
+/* ========= 表示 ========= */
+const format = n => Math.floor(n).toLocaleString();
+const getNextXP = lv => Math.floor(100*Math.pow(1.5,lv-1));
 
 function updateDisplay(){
- let need=getNextXP(gameData.level);
- while(gameData.xp>=need){gameData.xp-=need;gameData.level++;need=getNextXP(gameData.level);}
- document.getElementById("pts").innerText=format(gameData.pts);
- document.getElementById("level").innerText=gameData.level;
- document.getElementById("xp-bar").style.width=(gameData.xp/need*100)+"%";
+  let need = getNextXP(gameData.level);
+  while(gameData.xp >= need){
+    gameData.xp -= need;
+    gameData.level++;
+    need = getNextXP(gameData.level);
+  }
+  document.getElementById("pts").innerText = format(gameData.pts);
+  document.getElementById("level").innerText = gameData.level;
+  document.getElementById("xp-bar").style.width = (gameData.xp/need*100)+"%";
+  saveGame();
 }
 
-/* バフ */
-function updateBuffDisplay(){
- const b=document.getElementById("buff-container");
- b.innerHTML="";
- if(gameData.boostUntil>Date.now()){
-   b.innerHTML=`<div class="buff"><span>Wブースト</span><span>${Math.ceil((gameData.boostUntil-Date.now())/1000)}s</span></div>`;
- }
-}
-
-/* クリック */
+/* ========= クリック ========= */
 function performClick(e){
- const boost=Date.now()<gameData.boostUntil?2:1;
- const gain=Math.floor((gameData.power+gameData.moneyBonus)*boost*(1+gameData.rebirth*0.2));
- gameData.pts+=gain;
- gameData.xp+=gain*2;
+  const boost = Date.now()<gameData.boostUntil ? 2 : 1;
+  const gain = gameData.power * boost * (1+gameData.rebirth*0.2);
 
- const g=document.createElement("div");
- g.className="gain-text";
- g.innerText="+"+format(gain);
- g.style.left=e.clientX+"px";
- g.style.top=e.clientY+"px";
- document.body.appendChild(g);
- setTimeout(()=>g.remove(),1000);
+  gameData.pts += gain;
+  gameData.xp += gain*2;
 
- playClickSound();
- updateDisplay();
+  /* 波紋 */
+  const r = document.createElement("span");
+  r.className="ripple";
+  const rect = e.currentTarget.getBoundingClientRect();
+  r.style.width=r.style.height=rect.width+"px";
+  r.style.left=(e.clientX-rect.left-rect.width/2)+"px";
+  r.style.top=(e.clientY-rect.top-rect.height/2)+"px";
+  e.currentTarget.appendChild(r);
+  setTimeout(()=>r.remove(),600);
+
+  /* +G */
+  const g = document.createElement("div");
+  g.className="gain-text";
+  g.innerText="+"+format(gain)+" G";
+  g.style.left=e.clientX+"px";
+  g.style.top=e.clientY+"px";
+  document.body.appendChild(g);
+  setTimeout(()=>g.remove(),1000);
+
+  updateDisplay();
 }
 
-/* ボス */
+/* ========= ボス ========= */
 function startBoss(){
- bossData.active=true;
- const r=gameData.rebirth;
- bossData.maxHp=Math.floor(bossData.baseHp*(1+r*0.5));
- bossData.hp=bossData.maxHp;
- bossData.time=Math.max(5,bossData.baseTime-r);
+  bossData.active=true;
+  bossData.hp = Math.floor(bossData.baseHp*(1+gameData.rebirth*0.5));
+  bossData.time = Math.max(5,10-gameData.rebirth);
+  document.getElementById("boss-area").style.display="block";
 
- document.getElementById("boss-area").style.display="block";
- document.getElementById("boss-start-btn").disabled=true;
-
- playBossStartSound();
- updateBossUI();
-
- bossData.timerId=setInterval(()=>{
-   bossData.time--;
-   updateBossUI();
-   if(bossData.time<=0) endBoss(false);
- },1000);
+  updateBossUI();
+  bossData.timer=setInterval(()=>{
+    bossData.time--;
+    updateBossUI();
+    if(bossData.time<=0) endBoss(false);
+  },1000);
 }
 
 function attackBoss(){
- if(!bossData.active)return;
- const dmg=(gameData.power+gameData.moneyBonus)*(Date.now()<gameData.boostUntil?2:1);
- bossData.hp-=dmg;
- playAttackSound();
- if(bossData.hp<=0) endBoss(true);
- updateBossUI();
+  if(!bossData.active) return;
+  const dmg = gameData.power*(1+gameData.rebirth*0.2);
+  bossData.hp -= dmg;
+  if(bossData.hp<=0) endBoss(true);
+  updateBossUI();
 }
 
 function updateBossUI(){
- document.getElementById("boss-hp-text").innerText=
-  `HP ${Math.max(0,Math.floor(bossData.hp))}/${bossData.maxHp}`;
- document.getElementById("boss-hp-bar").style.width=
-  Math.max(0,bossData.hp/bossData.maxHp*100)+"%";
- document.getElementById("boss-timer").innerText=`残り ${bossData.time}s`;
- document.getElementById("boss-rank").innerText=`強化段階：★${gameData.rebirth}`;
+  document.getElementById("boss-hp-text").innerText =
+    `HP ${Math.max(0,Math.floor(bossData.hp))}`;
+  document.getElementById("boss-hp-bar").style.width =
+    Math.max(0,bossData.hp/(bossData.baseHp*(1+gameData.rebirth*0.5))*100)+"%";
+  document.getElementById("boss-timer").innerText = `残り ${bossData.time}s`;
+  document.getElementById("boss-rank").innerText = `強化段階 ★${gameData.rebirth}`;
 }
 
 function endBoss(win){
- clearInterval(bossData.timerId);
- bossData.active=false;
- document.getElementById("boss-area").style.display="none";
- document.getElementById("boss-start-btn").disabled=false;
-
- if(win){
-   const bonus=1+gameData.rebirth*0.2;
-   gameData.pts+=Math.floor(3000*bonus);
-   gameData.xp+=Math.floor(500*bonus);
-   playBossWinSound();
- }else{
-   gameData.pts=Math.max(0,gameData.pts-300);
-   playBossLoseSound();
- }
- updateDisplay();
+  clearInterval(bossData.timer);
+  bossData.active=false;
+  document.getElementById("boss-area").style.display="none";
+  if(win){
+    gameData.pts += 3000*(1+gameData.rebirth*0.2);
+    gameData.xp += 500;
+  }else{
+    gameData.pts = Math.max(0, gameData.pts-300);
+  }
+  updateDisplay();
 }
 
-/* 自動 */
-setInterval(()=>{
- if(gameData.autoAmount>0 && !bossData.active){
-   gameData.pts+=gameData.autoAmount;
-   updateDisplay();
- }
- updateBuffDisplay();
-},1000);
+/* ========= 初期化 ========= */
+loadGame();
+updateDisplay();
+window.addEventListener("beforeunload", saveGame);
 </script>
 
 </body>
