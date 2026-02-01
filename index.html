@@ -334,10 +334,12 @@ function updateDisplay(){
   if(gameData.level >= 20) items[6].classList.add("unlocked");
   
   if(gameData.level >= 20) {
-    document.getElementById("dragon-boss-btn").style.display = "inline-block";
+    const dragonBtn = document.getElementById("dragon-boss-btn");
+    if(dragonBtn) dragonBtn.style.display = "inline-block";
   }
   
-  document.getElementById("boss-start-btn").disabled = gameData.level < 10;
+  const goblinBtn = document.getElementById("goblin-boss-btn");
+  if(goblinBtn) goblinBtn.disabled = gameData.level < 10;
   saveGame();
 }
 
