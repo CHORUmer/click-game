@@ -46,6 +46,7 @@ body {
   color: white;
   font-size: 20px;
   margin: 15px;
+  cursor: pointer;
 }
 
 .ripple {
@@ -146,7 +147,6 @@ body {
   <div class="item" id="item5">Wブースト<button onclick="buyItem(5,3000)">3000G</button></div>
 </div>
 
-// ...existing code...
 <script>
 let gameData={pts:0,xp:0,level:1,power:1,autoAmount:0,boostUntil:0};
 let bossData={active:false,maxHp:1000,hp:1000,time:30,timerId:null};
@@ -161,6 +161,7 @@ const bossAreaElem = document.getElementById('boss-area');
 const bossHpTextElem = document.getElementById('boss-hp-text');
 const bossHpBarElem = document.getElementById('boss-hp-bar');
 const bossTimerElem = document.getElementById('boss-timer');
+const item1 = document.getElementById('item1');
 const item2 = document.getElementById('item2');
 const item3 = document.getElementById('item3');
 const item4 = document.getElementById('item4');
@@ -168,19 +169,44 @@ const item5 = document.getElementById('item5');
 
 /* 効果音 */
 let audioCtx;
-function initAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||webkitAudioContext)();}
-function playSE(f,d=0.1){
-  initAudio();
-  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-  o.frequency.value=f; g.gain.value=0.08;
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(); o.stop(audioCtx.currentTime+d);
+function initAudio(){
+  if(!audioCtx){
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  }
 }
+
+function playSE(f,d=0.1){
+  try{
+    initAudio();
+    const o=audioCtx.createOscillator();
+    const g=audioCtx.createGain();
+    o.frequency.value=f;
+    g.gain.setValueAtTime(0.08,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+d);
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    o.start(audioCtx.currentTime);
+    o.stop(audioCtx.currentTime+d);
+  }catch(e){console.log("音声再生エラー:",e);}
+}
+
 const playClickSound=()=>playSE(700,0.05);
 const playAttackSound=()=>playSE(900,0.04);
 const playBossStartSound=()=>playSE(180,0.4);
 const playBossWinSound=()=>playSE(1200,0.4);
 const playBossLoseSound=()=>playSE(120,0.5);
+
+/* セーブ/ロード */
+function saveGame(){
+  localStorage.setItem('gameData',JSON.stringify(gameData));
+}
+
+function loadGame(){
+  const saved=localStorage.getItem('gameData');
+  if(saved){
+    gameData=JSON.parse(saved);
+  }
+}
 
 /* 表示 */
 const format=n=>Math.floor(n).toLocaleString();
@@ -197,6 +223,7 @@ function updateDisplay(){
   if(gameData.level>=10)item4.classList.add("unlocked");
   if(gameData.level>=15)item5.classList.add("unlocked");
   bossStartBtnElem.disabled=gameData.level<10;
+  saveGame();
 }
 
 /* バフ */
@@ -211,17 +238,24 @@ function updateBuffDisplay(){
 function performClick(e){
   const b=Date.now()<gameData.boostUntil?2:1;
   const g=gameData.power*b;
-  gameData.pts+=g; gameData.xp+=g*2;
-  playClickSound(); updateDisplay();
+  gameData.pts+=g;
+  gameData.xp+=g*2;
+  playClickSound();
+  updateDisplay();
 }
 
 /* ボス */
 function startBoss(){
-  bossData.active=true; bossData.hp=bossData.maxHp; bossData.time=30;
-  bossAreaElem.style.display="block"; bossStartBtnElem.disabled=true;
-  playBossStartSound(); updateBossUI();
+  bossData.active=true;
+  bossData.hp=bossData.maxHp;
+  bossData.time=30;
+  bossAreaElem.style.display="block";
+  bossStartBtnElem.disabled=true;
+  playBossStartSound();
+  updateBossUI();
   bossData.timerId=setInterval(()=>{
-    bossData.time--; updateBossUI();
+    bossData.time--;
+    updateBossUI();
     if(bossData.time<=0) endBoss(false);
   },1000);
 }
@@ -236,18 +270,23 @@ function attackBoss(e){
 }
 
 function updateBossUI(){
-  bossHpTextElem.innerText=`HP ${Math.max(0,bossData.hp)}/${bossData.maxHp}`;
+  bossHpTextElem.innerText=`HP ${Math.max(0,Math.floor(bossData.hp))}/${bossData.maxHp}`;
   bossHpBarElem.style.width=Math.max(0,bossData.hp/bossData.maxHp*100)+"%";
   bossTimerElem.innerText=`残り ${bossData.time}s`;
 }
 
 function endBoss(win){
   clearInterval(bossData.timerId);
-  bossData.active=false; bossAreaElem.style.display="none"; bossStartBtnElem.disabled=false;
+  bossData.active=false;
+  bossAreaElem.style.display="none";
+  bossStartBtnElem.disabled=false;
   if(win){
-    gameData.pts+=3000; gameData.xp+=500; playBossWinSound();
+    gameData.pts+=3000;
+    gameData.xp+=500;
+    playBossWinSound();
   }else{
-    gameData.pts=Math.max(0,gameData.pts-300); playBossLoseSound();
+    gameData.pts=Math.max(0,gameData.pts-300);
+    playBossLoseSound();
   }
   updateDisplay();
 }
@@ -266,8 +305,21 @@ function buyItem(id,cost){
   updateDisplay();
 }
 
+/* 初期化 */
+loadGame();
+updateDisplay();
+
 /* 自動 */
-setInterval(()=>{if(gameData.autoAmount>0){gameData.pts+=gameData.autoAmount;} updateBuffDisplay();},1000);
+setInterval(()=>{
+  if(gameData.autoAmount>0){
+    gameData.pts+=gameData.autoAmount;
+    updateDisplay();
+  }
+  updateBuffDisplay();
+},1000);
+
+/* ページ離脱時に自動保存 */
+window.addEventListener('beforeunload',()=>{saveGame();});
 </script>
 
 </body>
