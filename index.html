@@ -147,6 +147,7 @@ body {
   <div class="item" id="item5">Wブースト<button onclick="buyItem(5,3000)">3000G</button></div>
 </div>
 
+<!-- ...existing code... -->
 <script>
 let gameData={pts:0,xp:0,level:1,power:1,autoAmount:0,boostUntil:0};
 let bossData={active:false,maxHp:1000,hp:1000,time:30,timerId:null};
@@ -234,6 +235,15 @@ function updateBuffDisplay(){
   }
 }
 
+/* エラーメッセージ表示 */
+function showErrorMessage(msg){
+  const div=document.createElement('div');
+  div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#c0392b;color:white;padding:20px 30px;border-radius:10px;font-size:16px;z-index:9999;font-weight:bold;';
+  div.innerText=msg;
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),2000);
+}
+
 /* クリック */
 function performClick(e){
   const b=Date.now()<gameData.boostUntil?2:1;
@@ -293,7 +303,10 @@ function endBoss(win){
 
 /* ショップ */
 function buyItem(id,cost){
-  if(gameData.pts<cost) return alert("お金が足りません");
+  if(gameData.pts<cost){
+    showErrorMessage("お金が足りません");
+    return;
+  }
   gameData.pts-=cost;
   switch(id){
     case 1: gameData.power+=1; break;
@@ -305,13 +318,22 @@ function buyItem(id,cost){
   updateDisplay();
 }
 
+/* エラーメッセージ表示 */
+function showErrorMessage(msg){
+  const div=document.createElement('div');
+  div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#c0392b;color:white;padding:20px 30px;border-radius:10px;font-size:16px;z-index:9999;font-weight:bold;';
+  div.innerText=msg;
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),2000);
+}
+
 /* 初期化 */
 loadGame();
 updateDisplay();
 
 /* 自動 */
 setInterval(()=>{
-  if(gameData.autoAmount>0){
+  if(gameData.autoAmount>0 && !bossData.active){
     gameData.pts+=gameData.autoAmount;
     updateDisplay();
   }
