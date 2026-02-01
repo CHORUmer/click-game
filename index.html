@@ -208,6 +208,7 @@ let bossData = {
   active: false,
   baseHp: 1000,
   hp: 1000,
+  maxHp: 1000,
   time: 10,
   timer: null
 };
@@ -274,8 +275,8 @@ function performClick(e){
   const boost = Date.now() < gameData.boostUntil ? 2 : 1;
   const gain = Math.floor(gameData.power * boost * (1 + gameData.rebirth * 0.2));
 
-  gameData.pts += gain;
-  gameData.xp += gain * 2;
+  gameData.pts = (gameData.pts || 0) + gain;
+  gameData.xp = (gameData.xp || 0) + gain * 2;
 
   const r = document.createElement("span");
   r.className = "ripple";
@@ -298,9 +299,9 @@ function performClick(e){
 }
 
 function startBoss(){
+  bossData.maxHp = Math.floor(1000 * (1 + gameData.rebirth * 0.5));
+  bossData.hp = bossData.maxHp;
   bossData.active = true;
-  bossData.baseHp = Math.max(1000, 1000 + gameData.rebirth * 500);
-  bossData.hp = bossData.baseHp;
   bossData.time = Math.max(5, 10 - gameData.rebirth);
   
   document.getElementById("boss-area").style.display = "block";
@@ -316,7 +317,7 @@ function startBoss(){
   }, 1000);
 }
 
-function attackBoss(){
+function attackBoss(e){
   if(!bossData.active) return;
   const dmg = Math.floor(gameData.power * (1 + gameData.rebirth * 0.2));
   bossData.hp -= dmg;
@@ -325,11 +326,10 @@ function attackBoss(){
 }
 
 function updateBossUI(){
-  const maxHp = Math.max(1000, 1000 + gameData.rebirth * 500);
   const currentHp = Math.max(0, Math.floor(bossData.hp));
   
-  document.getElementById("boss-hp-text").innerText = `HP ${format(currentHp)}/${format(maxHp)}`;
-  document.getElementById("boss-hp-bar").style.width = Math.max(0, (currentHp / maxHp * 100)) + "%";
+  document.getElementById("boss-hp-text").innerText = `HP ${format(currentHp)}/${format(bossData.maxHp)}`;
+  document.getElementById("boss-hp-bar").style.width = Math.max(0, Math.min(100, (currentHp / bossData.maxHp * 100))) + "%";
   document.getElementById("boss-timer").innerText = `残り ${Math.max(0, bossData.time)}s`;
   document.getElementById("boss-rank").innerText = `強化段階 ★${gameData.rebirth}`;
 }
@@ -341,10 +341,10 @@ function endBoss(win){
   document.getElementById("boss-start-btn").disabled = false;
   
   if(win){
-    gameData.pts += Math.floor(3000 * (1 + gameData.rebirth * 0.2));
-    gameData.xp += 500;
+    gameData.pts = (gameData.pts || 0) + Math.floor(3000 * (1 + gameData.rebirth * 0.2));
+    gameData.xp = (gameData.xp || 0) + 500;
   }else{
-    gameData.pts = Math.max(0, gameData.pts - 300);
+    gameData.pts = Math.max(0, (gameData.pts || 0) - 300);
   }
   updateDisplay();
 }
@@ -372,7 +372,7 @@ updateDisplay();
 // 自動更新ループ
 setInterval(() => {
   if(gameData.autoAmount > 0 && !bossData.active){
-    gameData.pts += gameData.autoAmount;
+    gameData.pts = (gameData.pts || 0) + gameData.autoAmount;
     updateDisplay();
   }
   updateBuffDisplay();
