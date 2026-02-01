@@ -206,18 +206,18 @@ button.shop-btn {
     <div class="desc">自動生成 +5。Lv10で解禁。</div>
   </div>
 
-  <div class="item" id="item6">
-    両刃斧
-    <button onclick="buyItem(6,1500)">1500G</button>
-    <div class="desc">攻撃力 +10。強力な武器。Lv12で解禁。</div>
-  </div>
-</div>
- 
-<div class="item" id="item5">
+  <div class="item" id="item5">
     Wブースト
-    <button onclick="buyItem(5,3000)">3000G</button>
+    <button onclick="buyItem(5,7500)">7500G</button>
     <div class="desc">10秒間ダブルブースト。</div>
   </div>
+
+  <div class="item" id="item6">
+    両刃斧
+    <button onclick="buyItem(6,2500)">2500G</button>
+    <div class="desc">攻撃力 +10。強力な武器。Lv12で解禁。</div>
+  </div>
+
   <div class="item" id="item7">
     リボーン
     <button onclick="buyItem(7,3000000)">3000000G</button>
@@ -464,8 +464,9 @@ function endBoss(win){
   document.getElementById("dragon-boss-btn").disabled = false;
   
   if(win){
-    gameData.pts = (gameData.pts || 0) + Math.floor(3000 * (1 + gameData.rebirth * 0.2));
-    gameData.xp = (gameData.xp || 0) + 500;
+    const bossRewardMult = (1 + gameData.rebirth * 0.2);
+    gameData.pts = (gameData.pts || 0) + Math.floor(3000 * bossRewardMult);
+    gameData.xp = (gameData.xp || 0) + Math.floor(500 * bossRewardMult);
     playBossWinSound();
   }else{
     gameData.pts = Math.max(0, (gameData.pts || 0) - 300);
