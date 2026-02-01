@@ -89,6 +89,34 @@ body {
     to { opacity: 0; transform: translate(-50%, -40px); }
 }
 
+/* バフ表示 */
+#buff-container {
+    max-width: 300px;
+    margin: 10px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.buff {
+    background: #1e1e1e;
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.buff-name {
+    color: #f39c12;
+    font-weight: bold;
+}
+
+.buff-time {
+    color: #2ecc71;
+}
+
 .shop {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -116,12 +144,6 @@ button {
     border-radius: 5px;
 }
 button:disabled { background: #555; }
-
-.save-msg {
-    color: #2ecc71;
-    font-size: 12px;
-    height: 15px;
-}
 </style>
 </head>
 
@@ -140,7 +162,9 @@ button:disabled { background: #555; }
 </div>
 
 <button class="main-btn" onclick="performClick(event)">CLICK!</button>
-<div class="save-msg" id="save-msg"></div>
+
+<!-- バフ表示 -->
+<div id="buff-container"></div>
 
 <div class="shop">
     <div class="item unlocked" id="item1">木刀<br><small>Click +1</small><button onclick="buyItem(1,50)">50 G</button></div>
@@ -151,7 +175,6 @@ button:disabled { background: #555; }
 </div>
 
 <script>
-/* ========= ゲームデータ ========= */
 let gameData = {
     pts: 0,
     xp: 0,
@@ -161,37 +184,31 @@ let gameData = {
     boostUntil: 0
 };
 
-/* ========= 効果音 ========= */
+/* 効果音 */
 let audioCtx;
 function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
 function playClickSound() {
     initAudio();
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
-    o.type = "square";
     o.frequency.value = 700;
     g.gain.value = 0.05;
     o.connect(g); g.connect(audioCtx.destination);
-    o.start();
-    o.stop(audioCtx.currentTime + 0.05);
+    o.start(); o.stop(audioCtx.currentTime + 0.05);
 }
 function playBuySound() {
     initAudio();
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
-    o.type = "triangle";
     o.frequency.value = 350;
     g.gain.value = 0.07;
     o.connect(g); g.connect(audioCtx.destination);
-    o.start();
-    o.stop(audioCtx.currentTime + 0.15);
+    o.start(); o.stop(audioCtx.currentTime + 0.15);
 }
 
-/* ========= セーブ & ロード ========= */
+/* セーブ */
 function saveGame() {
     localStorage.setItem("clickerSave", JSON.stringify(gameData));
 }
@@ -201,13 +218,10 @@ function loadGame() {
     updateDisplay();
 }
 
-/* ========= 表示 ========= */
-function format(num) {
-    return Math.floor(num).toLocaleString();
-}
-function getNextXP(lv) {
-    return Math.floor(100 * Math.pow(1.5, lv - 1));
-}
+/* 表示 */
+function format(n){ return Math.floor(n).toLocaleString(); }
+function getNextXP(lv){ return Math.floor(100 * Math.pow(1.5, lv - 1)); }
+
 function updateDisplay() {
     let need = getNextXP(gameData.level);
     while (gameData.xp >= need) {
@@ -219,83 +233,65 @@ function updateDisplay() {
     document.getElementById("level").innerText = gameData.level;
     document.getElementById("xp-bar").style.width = (gameData.xp / need * 100) + "%";
 
-    if (gameData.level >= 3) document.getElementById("item2").classList.add("unlocked");
-    if (gameData.level >= 5) document.getElementById("item3").classList.add("unlocked");
-    if (gameData.level >= 10) document.getElementById("item4").classList.add("unlocked");
-    if (gameData.level >= 15) document.getElementById("item5").classList.add("unlocked");
+    if (gameData.level >= 3) item2.classList.add("unlocked");
+    if (gameData.level >= 5) item3.classList.add("unlocked");
+    if (gameData.level >= 10) item4.classList.add("unlocked");
+    if (gameData.level >= 15) item5.classList.add("unlocked");
 }
 
-/* ========= クリック ========= */
+/* バフ表示 */
+function updateBuffDisplay() {
+    const c = document.getElementById("buff-container");
+    c.innerHTML = "";
+    const now = Date.now();
+
+    if (gameData.boostUntil > now) {
+        const r = Math.ceil((gameData.boostUntil - now) / 1000);
+        const b = document.createElement("div");
+        b.className = "buff";
+        b.innerHTML = `<span class="buff-name">Wブースト</span><span class="buff-time">${r}s</span>`;
+        c.appendChild(b);
+    }
+}
+
+/* クリック */
 function performClick(e) {
     const boost = Date.now() < gameData.boostUntil ? 2 : 1;
     const gain = gameData.power * boost;
-
     gameData.pts += gain;
     gameData.xp += gain * 2;
-
     playClickSound();
-    showRipple(e);
-    showGainText(gain);
     updateDisplay();
 }
 
-/* 波紋 */
-function showRipple(e) {
-    const btn = e.currentTarget;
-    const r = btn.getBoundingClientRect();
-    const size = r.width;
-    const c = document.createElement("span");
-    c.className = "ripple";
-    c.style.width = c.style.height = size + "px";
-    c.style.left = e.clientX - r.left - size / 2 + "px";
-    c.style.top = e.clientY - r.top - size / 2 + "px";
-    btn.appendChild(c);
-    setTimeout(() => c.remove(), 600);
-}
-
-/* +G */
-function showGainText(gain) {
-    const t = document.createElement("div");
-    t.className = "gain-text";
-    t.innerText = "+" + format(gain) + " G";
-    t.style.left = "50%";
-    t.style.top = "50%";
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 1000);
-}
-
-/* ========= アイテム ========= */
-function buyItem(id, cost) {
-    if (gameData.pts < cost) return;
-
-    gameData.pts -= cost;
-    if (id === 1) gameData.power += 1;
-    if (id === 2) gameData.autoAmount += 2;
-    if (id === 3) gameData.power += 10;
-    if (id === 4) gameData.autoAmount += 50;
-    if (id === 5) gameData.boostUntil = Date.now() + 60000;
-
+/* アイテム */
+function buyItem(id,cost){
+    if(gameData.pts<cost)return;
+    gameData.pts-=cost;
+    if(id===1)gameData.power+=1;
+    if(id===2)gameData.autoAmount+=2;
+    if(id===3)gameData.power+=10;
+    if(id===4)gameData.autoAmount+=50;
+    if(id===5)gameData.boostUntil=Date.now()+60000;
     playBuySound();
     updateDisplay();
     saveGame();
 }
 
-/* ========= 自動加算 ========= */
-setInterval(() => {
-    if (gameData.autoAmount > 0) {
-        gameData.pts += gameData.autoAmount;
-        gameData.xp += gameData.autoAmount * 0.1;
+/* 自動 */
+setInterval(()=>{
+    if(gameData.autoAmount>0){
+        gameData.pts+=gameData.autoAmount;
+        gameData.xp+=gameData.autoAmount*0.1;
         updateDisplay();
     }
-}, 1000);
+    updateBuffDisplay();
+},1000);
 
-/* ========= 退出時オートセーブ ========= */
-window.addEventListener("beforeunload", () => {
-    saveGame();
-});
+window.addEventListener("beforeunload",saveGame);
 
-/* 起動時 */
 loadGame();
+updateBuffDisplay();
 </script>
 
 </body>
