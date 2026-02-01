@@ -147,7 +147,6 @@ body {
   <div class="item" id="item5">Wブースト<button onclick="buyItem(5,3000)">3000G</button></div>
 </div>
 
-<!-- ...existing code... -->
 <script>
 let gameData={pts:0,xp:0,level:1,power:1,autoAmount:0,boostUntil:0};
 let bossData={active:false,maxHp:1000,hp:1000,time:30,timerId:null};
@@ -167,6 +166,7 @@ const item2 = document.getElementById('item2');
 const item3 = document.getElementById('item3');
 const item4 = document.getElementById('item4');
 const item5 = document.getElementById('item5');
+const clickBtn = document.querySelector('.main-btn');
 
 /* 効果音 */
 let audioCtx;
@@ -250,6 +250,24 @@ function performClick(e){
   const g=gameData.power*b;
   gameData.pts+=g;
   gameData.xp+=g*2;
+  
+  /* 波紋エフェクト */
+  const ripple=document.createElement('div');
+  ripple.className='ripple';
+  ripple.style.left=e.clientX+'px';
+  ripple.style.top=e.clientY+'px';
+  document.body.appendChild(ripple);
+  setTimeout(()=>ripple.remove(),600);
+  
+  /* +G表示 */
+  const gainText=document.createElement('div');
+  gainText.className='gain-text';
+  gainText.innerText='+'+format(g);
+  gainText.style.left=e.clientX+'px';
+  gainText.style.top=e.clientY+'px';
+  document.body.appendChild(gainText);
+  setTimeout(()=>gainText.remove(),1000);
+  
   playClickSound();
   updateDisplay();
 }
@@ -316,15 +334,6 @@ function buyItem(id,cost){
     case 5: gameData.boostUntil=Date.now()+10000; break;
   }
   updateDisplay();
-}
-
-/* エラーメッセージ表示 */
-function showErrorMessage(msg){
-  const div=document.createElement('div');
-  div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#c0392b;color:white;padding:20px 30px;border-radius:10px;font-size:16px;z-index:9999;font-weight:bold;';
-  div.innerText=msg;
-  document.body.appendChild(div);
-  setTimeout(()=>div.remove(),2000);
 }
 
 /* 初期化 */
