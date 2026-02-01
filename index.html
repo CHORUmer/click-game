@@ -281,7 +281,16 @@ function loadGame(){
   const s = localStorage.getItem("clickerSave");
   if(s){
     try{
-      gameData = Object.assign(gameData, JSON.parse(s));
+      const parsed = JSON.parse(s);
+      // 数値フィールドは文字列で保存されている可能性があるため、明示的に数値化して代入
+      gameData.pts = Number(parsed.pts) || gameData.pts || 0;
+      gameData.xp = Number(parsed.xp) || gameData.xp || 0;
+      gameData.level = Number(parsed.level) || gameData.level || 1;
+      gameData.power = Number(parsed.power) || gameData.power || 1;
+      gameData.autoAmount = Number(parsed.autoAmount) || gameData.autoAmount || 0;
+      gameData.boostUntil = Number(parsed.boostUntil) || gameData.boostUntil || 0;
+      gameData.rebirth = Number(parsed.rebirth) || gameData.rebirth || 0;
+      // もし将来的にプロパティが増えていれば、その他は既存の値を保持する
     }catch(e){
       console.log("セーブデータ読み込みエラー:", e);
     }
@@ -344,8 +353,8 @@ function performClick(e){
   const boost = Date.now() < gameData.boostUntil ? 2 : 1;
   const gain = Math.floor(gameData.power * boost * (1 + gameData.rebirth * 0.2));
 
-  gameData.pts = (gameData.pts || 0) + gain;
-  gameData.xp = (gameData.xp || 0) + gain * 2;
+  gameData.pts = (Number(gameData.pts) || 0) + gain;
+  gameData.xp = (Number(gameData.xp) || 0) + gain * 2;
 
   const r = document.createElement("span");
   r.className = "ripple";
@@ -429,11 +438,11 @@ function endBoss(win){
 }
 
 function buyItem(id, cost){
-  if(gameData.pts < cost){
+  if((Number(gameData.pts) || 0) < cost){
     alert("お金が足りません");
     return;
   }
-  gameData.pts -= cost;
+  gameData.pts = (Number(gameData.pts) || 0) - cost;
   switch(id){
     case 1: gameData.power += 1; break;
     case 2: gameData.autoAmount += 1; break;
@@ -461,8 +470,9 @@ updateDisplay();
 
 // 自動更新ループ
 setInterval(() => {
-  if(gameData.autoAmount > 0 && !bossData.active){
-    gameData.pts = (gameData.pts || 0) + gameData.autoAmount;
+  // 数値化してから加算することで文字列連結などの不具合を防ぐ
+  if((Number(gameData.autoAmount) || 0) > 0 && !bossData.active){
+    gameData.pts = (Number(gameData.pts) || 0) + (Number(gameData.autoAmount) || 0);
     updateDisplay();
   }
   updateBuffDisplay();
