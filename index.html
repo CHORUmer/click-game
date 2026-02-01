@@ -254,6 +254,31 @@ function updateBuffDisplay() {
     }
 }
 
+/* 波紋 */
+function showRipple(e) {
+    const btn = e.currentTarget;
+    const r = btn.getBoundingClientRect();
+    const size = r.width;
+    const c = document.createElement("span");
+    c.className = "ripple";
+    c.style.width = c.style.height = size + "px";
+    c.style.left = e.clientX - r.left - size / 2 + "px";
+    c.style.top = e.clientY - r.top - size / 2 + "px";
+    btn.appendChild(c);
+    setTimeout(() => c.remove(), 600);
+}
+
+/* +G表示 */
+function showGainText(gain) {
+    const t = document.createElement("div");
+    t.className = "gain-text";
+    t.innerText = "+" + format(gain) + " G";
+    t.style.left = "50%";
+    t.style.top = "50%";
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1000);
+}
+
 /* クリック */
 function performClick(e) {
     const boost = Date.now() < gameData.boostUntil ? 2 : 1;
@@ -261,6 +286,8 @@ function performClick(e) {
     gameData.pts += gain;
     gameData.xp += gain * 2;
     playClickSound();
+    showRipple(e);
+    showGainText(gain);
     updateDisplay();
 }
 
