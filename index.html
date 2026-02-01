@@ -118,6 +118,21 @@ body {
   max-width:300px;
 }
 
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  background: #222;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
 button.shop-btn {
   margin-top:10px;
   padding:10px 20px;
@@ -143,10 +158,7 @@ button.shop-btn {
     <span>MONEY</span>
     <span class="money-value"><span id="pts">0</span> G</span>
   </div>
-  <div class="stat-box">
-    <span>REBIRTH</span>
-    <span class="xp-value" style="display:none;">×<span id="rebirth-multiplier">1.0</span></span>
-  </div>
+  
 </div>
 
 <div id="multiplier-top" style="margin:0 auto 12px; font-size:18px; font-weight:bold; color:#f1c40f;">倍率 ×<span id="rebirth-multiplier-top">1.0</span></div>
@@ -273,6 +285,24 @@ const playAttackSound = () => playSE(900, 0.08, 0.25);
 const playBossWinSound = () => playSE(1200, 0.3, 0.3);
 const playBossLoseSound = () => playSE(150, 0.4, 0.3);
 const playBuySound = () => playSE(500, 0.15, 0.25);
+
+const playErrorSound = () => playSE(180, 0.12, 0.28);
+
+function showMessage(msg, duration = 1500){
+  try{
+    playErrorSound();
+  }catch(e){ }
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerText = msg;
+  document.body.appendChild(el);
+  // allow CSS transition
+  requestAnimationFrame(() => el.style.opacity = '1');
+  setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+}
 
 function saveGame(){
   localStorage.setItem("clickerSave", JSON.stringify(gameData));
@@ -446,7 +476,7 @@ function endBoss(win){
 
 function buyItem(id, cost){
   if((Number(gameData.pts) || 0) < cost){
-    alert("お金が足りません");
+    showMessage("お金が足りません");
     return;
   }
   gameData.pts = (Number(gameData.pts) || 0) - cost;
