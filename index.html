@@ -233,10 +233,10 @@ function updateDisplay() {
     document.getElementById("level").innerText = gameData.level;
     document.getElementById("xp-bar").style.width = (gameData.xp / need * 100) + "%";
 
-    if (gameData.level >= 3) item2.classList.add("unlocked");
-    if (gameData.level >= 5) item3.classList.add("unlocked");
-    if (gameData.level >= 10) item4.classList.add("unlocked");
-    if (gameData.level >= 15) item5.classList.add("unlocked");
+    if (gameData.level >= 3) document.getElementById("item2").classList.add("unlocked");
+    if (gameData.level >= 5) document.getElementById("item3").classList.add("unlocked");
+    if (gameData.level >= 10) document.getElementById("item4").classList.add("unlocked");
+    if (gameData.level >= 15) document.getElementById("item5").classList.add("unlocked");
 }
 
 /* バフ表示 */
