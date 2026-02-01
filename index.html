@@ -421,7 +421,8 @@ function buyItem(id, cost){
     case 5: gameData.boostUntil = Date.now() + 10000; break;
     case 6: gameData.power += 10; break;
     case 7: 
-      gameData.rebirth += 1; 
+      gameData.rebirth += 1;
+      // アイテムをリセット（rebirthは保持）
       gameData.level = 1;
       gameData.xp = 0;
       gameData.pts = 0;
