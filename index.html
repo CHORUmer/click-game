@@ -453,7 +453,8 @@ function buyItem(id, cost){
     case 5: gameData.boostUntil = Date.now() + 10000; break;
     case 6: gameData.power = (Number(gameData.power) || 0) + 10; break;
     case 7: 
-      // 倍率を保持したまま、アイテムをリセット
+      // 倍率を +20% して、アイテムをリセット
+      gameData.rebirth = (Number(gameData.rebirth) || 0) + 1;
       gameData.level = 1;
       gameData.xp = 0;
       gameData.pts = 0;
