@@ -260,6 +260,7 @@ const playBossStartSound = () => playSE(200, 0.3, 0.3);
 const playAttackSound = () => playSE(900, 0.08, 0.25);
 const playBossWinSound = () => playSE(1200, 0.3, 0.3);
 const playBossLoseSound = () => playSE(150, 0.4, 0.3);
+const playBuySound = () => playSE(500, 0.15, 0.25);
 
 function saveGame(){
   localStorage.setItem("clickerSave", JSON.stringify(gameData));
@@ -352,7 +353,7 @@ function performClick(e){
 }
 
 function startBoss(){
-  bossData.maxHp = Math.floor(1000 * (1 + gameData.rebirth * 2));
+  bossData.maxHp = Math.floor(1000 * (1 + gameData.rebirth * 1));
   bossData.hp = bossData.maxHp;
   bossData.active = true;
   bossData.time = Math.max(5, 10 - gameData.rebirth);
@@ -426,6 +427,7 @@ function buyItem(id, cost){
       gameData.pts = 0;
       break;
   }
+  playBuySound();
   updateDisplay();
 }
 
