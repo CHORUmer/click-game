@@ -3,322 +3,271 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>RPGクリッカー：完全版</title>
 
 <style>
-* {
-    touch-action: manipulation;
-    user-select: none;
-}
+* { touch-action: manipulation; user-select: none; }
 
 body {
-    text-align: center;
-    font-family: sans-serif;
-    background-color: #121212;
-    color: #e0e0e0;
-    padding: 20px;
-    -webkit-text-size-adjust: 100%;
+  text-align: center;
+  font-family: sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  padding: 20px;
 }
 
 .header {
-    display: flex;
-    justify-content: space-around;
-    background: #1e1e1e;
-    padding: 15px;
-    border-radius: 15px;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-around;
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 20px;
 }
 
 .stat-box { display: flex; flex-direction: column; }
-
 .xp-value { font-size: 24px; color: #3498db; font-weight: bold; }
 .money-value { font-size: 24px; color: #f1c40f; font-weight: bold; }
 
 #xp-bar-container {
-    width: 200px;
-    height: 10px;
-    background: #333;
-    border-radius: 5px;
-    margin: 5px auto;
+  width: 200px; height: 10px; background: #333;
+  border-radius: 5px; margin: 5px auto;
 }
-#xp-bar {
-    height: 100%;
-    background: #3498db;
-    transition: 0.3s;
-}
+#xp-bar { height: 100%; background: #3498db; transition: 0.3s; }
 
 .main-btn {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    border: none;
-    background: #2980b9;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    margin: 20px;
-    overflow: hidden;
+  position: relative;
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  border: none;
+  background: #2980b9;
+  color: white;
+  font-size: 20px;
+  margin: 15px;
 }
-.main-btn:active { transform: scale(0.95); }
 
-/* 波紋 */
 .ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.4);
-    transform: scale(0);
-    animation: ripple 0.6s linear;
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
 }
-@keyframes ripple {
-    to { transform: scale(4); opacity: 0; }
-}
+@keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
-/* +G表示 */
 .gain-text {
-    position: absolute;
-    color: #f1c40f;
-    font-weight: bold;
-    animation: floatUp 1s ease-out forwards;
-    pointer-events: none;
+  position: absolute;
+  color: #f1c40f;
+  font-weight: bold;
+  animation: floatUp 1s ease-out forwards;
+  pointer-events: none;
 }
 @keyframes floatUp {
-    from { opacity: 1; transform: translate(-50%, 0); }
-    to { opacity: 0; transform: translate(-50%, -40px); }
+  from { opacity: 1; transform: translate(-50%,0); }
+  to { opacity: 0; transform: translate(-50%,-40px); }
 }
 
-/* バフ表示 */
 #buff-container {
-    max-width: 300px;
-    margin: 10px auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  max-width: 300px;
+  margin: 10px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .buff {
-    background: #1e1e1e;
-    border: 1px solid #555;
-    border-radius: 8px;
-    padding: 8px;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.buff-name {
-    color: #f39c12;
-    font-weight: bold;
-}
-
-.buff-time {
-    color: #2ecc71;
+  background: #1e1e1e;
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .shop {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    max-width: 800px;
-    margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.item {
-    background: #1e1e1e;
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid #444;
-    display: none;
-}
-.item.unlocked { display: block; }
+.item { background:#1e1e1e; padding:15px; border-radius:12px; display:none; }
+.item.unlocked { display:block; }
 
-button {
-    width: 100%;
-    padding: 8px;
-    margin-top: 10px;
-    background: #27ae60;
-    color: white;
-    border: none;
-    border-radius: 5px;
+#boss-area {
+  display:none;
+  background:#1e1e1e;
+  padding:15px;
+  border-radius:15px;
+  margin:15px auto;
+  max-width:300px;
 }
-button:disabled { background: #555; }
 </style>
 </head>
 
 <body>
 
 <div class="header">
-    <div class="stat-box">
-        <span>LEVEL</span>
-        <span class="xp-value">Lv.<span id="level">1</span></span>
-        <div id="xp-bar-container"><div id="xp-bar"></div></div>
-    </div>
-    <div class="stat-box">
-        <span>MONEY</span>
-        <span class="money-value"><span id="pts">0</span> G</span>
-    </div>
+  <div class="stat-box">
+    <span>LEVEL</span>
+    <span class="xp-value">Lv.<span id="level">1</span></span>
+    <div id="xp-bar-container"><div id="xp-bar"></div></div>
+  </div>
+  <div class="stat-box">
+    <span>MONEY</span>
+    <span class="money-value"><span id="pts">0</span> G</span>
+  </div>
 </div>
 
 <button class="main-btn" onclick="performClick(event)">CLICK!</button>
 
-<!-- バフ表示 -->
 <div id="buff-container"></div>
 
-<div class="shop">
-    <div class="item unlocked" id="item1">木刀<br><small>Click +1</small><button onclick="buyItem(1,50)">50 G</button></div>
-    <div class="item" id="item2">見習い召喚師<br><small>Auto +2/s</small><button onclick="buyItem(2,200)">200 G</button></div>
-    <div class="item" id="item3">銀の剣<br><small>Click +10</small><button onclick="buyItem(3,800)">800 G</button></div>
-    <div class="item" id="item4">ドラゴンの巣<br><small>Auto +50/s</small><button onclick="buyItem(4,5000)">5000 G</button></div>
-    <div class="item" id="item5">Wブースト<br><small>1分間 Click ×2</small><button onclick="buyItem(5,3000)">3000 G</button></div>
+<button id="boss-start-btn" onclick="startBoss()">⚔️ ボスに挑む</button>
+
+<div id="boss-area">
+  <h3>ゴブリン王</h3>
+  <div id="boss-hp-text"></div>
+  <div style="background:#333;height:10px;border-radius:5px;">
+    <div id="boss-hp-bar" style="height:100%;background:#e74c3c;"></div>
+  </div>
+  <div id="boss-timer"></div>
+  <button class="main-btn" style="background:#c0392b" onclick="attackBoss(event)">ATTACK!</button>
 </div>
 
+<div class="shop">
+  <div class="item unlocked" id="item1">木刀<button onclick="buyItem(1,50)">50G</button></div>
+  <div class="item" id="item2">見習い召喚師<button onclick="buyItem(2,200)">200G</button></div>
+  <div class="item" id="item3">銀の剣<button onclick="buyItem(3,800)">800G</button></div>
+  <div class="item" id="item4">ドラゴンの巣<button onclick="buyItem(4,5000)">5000G</button></div>
+  <div class="item" id="item5">Wブースト<button onclick="buyItem(5,3000)">3000G</button></div>
+</div>
+
+// ...existing code...
 <script>
-let gameData = {
-    pts: 0,
-    xp: 0,
-    level: 1,
-    power: 1,
-    autoAmount: 0,
-    boostUntil: 0
-};
+let gameData={pts:0,xp:0,level:1,power:1,autoAmount:0,boostUntil:0};
+let bossData={active:false,maxHp:1000,hp:1000,time:30,timerId:null};
+
+/* 要素の取得 */
+const ptsElem = document.getElementById('pts');
+const levelElem = document.getElementById('level');
+const xpBarElem = document.getElementById('xp-bar');
+const buffContainerElem = document.getElementById('buff-container');
+const bossStartBtnElem = document.getElementById('boss-start-btn');
+const bossAreaElem = document.getElementById('boss-area');
+const bossHpTextElem = document.getElementById('boss-hp-text');
+const bossHpBarElem = document.getElementById('boss-hp-bar');
+const bossTimerElem = document.getElementById('boss-timer');
+const item2 = document.getElementById('item2');
+const item3 = document.getElementById('item3');
+const item4 = document.getElementById('item4');
+const item5 = document.getElementById('item5');
 
 /* 効果音 */
 let audioCtx;
-function initAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function initAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||webkitAudioContext)();}
+function playSE(f,d=0.1){
+  initAudio();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.frequency.value=f; g.gain.value=0.08;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime+d);
 }
-function playClickSound() {
-    initAudio();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.frequency.value = 700;
-    g.gain.value = 0.05;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + 0.05);
-}
-function playBuySound() {
-    initAudio();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
-    o.frequency.value = 350;
-    g.gain.value = 0.07;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + 0.15);
-}
-
-/* セーブ */
-function saveGame() {
-    localStorage.setItem("clickerSave", JSON.stringify(gameData));
-}
-function loadGame() {
-    const saved = localStorage.getItem("clickerSave");
-    if (saved) gameData = JSON.parse(saved);
-    updateDisplay();
-}
+const playClickSound=()=>playSE(700,0.05);
+const playAttackSound=()=>playSE(900,0.04);
+const playBossStartSound=()=>playSE(180,0.4);
+const playBossWinSound=()=>playSE(1200,0.4);
+const playBossLoseSound=()=>playSE(120,0.5);
 
 /* 表示 */
-function format(n){ return Math.floor(n).toLocaleString(); }
-function getNextXP(lv){ return Math.floor(100 * Math.pow(1.5, lv - 1)); }
+const format=n=>Math.floor(n).toLocaleString();
+const getNextXP=lv=>Math.floor(100*Math.pow(1.5,lv-1));
 
-function updateDisplay() {
-    let need = getNextXP(gameData.level);
-    while (gameData.xp >= need) {
-        gameData.xp -= need;
-        gameData.level++;
-        need = getNextXP(gameData.level);
-    }
-    document.getElementById("pts").innerText = format(gameData.pts);
-    document.getElementById("level").innerText = gameData.level;
-    document.getElementById("xp-bar").style.width = (gameData.xp / need * 100) + "%";
-
-    if (gameData.level >= 3) document.getElementById("item2").classList.add("unlocked");
-    if (gameData.level >= 5) document.getElementById("item3").classList.add("unlocked");
-    if (gameData.level >= 10) document.getElementById("item4").classList.add("unlocked");
-    if (gameData.level >= 15) document.getElementById("item5").classList.add("unlocked");
+function updateDisplay(){
+  let need=getNextXP(gameData.level);
+  while(gameData.xp>=need){gameData.xp-=need;gameData.level++;need=getNextXP(gameData.level);}
+  ptsElem.innerText=format(gameData.pts);
+  levelElem.innerText=gameData.level;
+  xpBarElem.style.width=(gameData.xp/need*100)+"%";
+  if(gameData.level>=3)item2.classList.add("unlocked");
+  if(gameData.level>=5)item3.classList.add("unlocked");
+  if(gameData.level>=10)item4.classList.add("unlocked");
+  if(gameData.level>=15)item5.classList.add("unlocked");
+  bossStartBtnElem.disabled=gameData.level<10;
 }
 
-/* バフ表示 */
-function updateBuffDisplay() {
-    const c = document.getElementById("buff-container");
-    c.innerHTML = "";
-    const now = Date.now();
-
-    if (gameData.boostUntil > now) {
-        const r = Math.ceil((gameData.boostUntil - now) / 1000);
-        const b = document.createElement("div");
-        b.className = "buff";
-        b.innerHTML = `<span class="buff-name">Wブースト</span><span class="buff-time">${r}s</span>`;
-        c.appendChild(b);
-    }
-}
-
-/* 波紋 */
-function showRipple(e) {
-    const btn = e.currentTarget;
-    const r = btn.getBoundingClientRect();
-    const size = r.width;
-    const c = document.createElement("span");
-    c.className = "ripple";
-    c.style.width = c.style.height = size + "px";
-    c.style.left = e.clientX - r.left - size / 2 + "px";
-    c.style.top = e.clientY - r.top - size / 2 + "px";
-    btn.appendChild(c);
-    setTimeout(() => c.remove(), 600);
-}
-
-/* +G表示 */
-function showGainText(gain) {
-    const t = document.createElement("div");
-    t.className = "gain-text";
-    t.innerText = "+" + format(gain) + " G";
-    t.style.left = "50%";
-    t.style.top = "50%";
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 1000);
+/* バフ */
+function updateBuffDisplay(){
+  buffContainerElem.innerHTML="";
+  if(gameData.boostUntil>Date.now()){
+    buffContainerElem.innerHTML=`<div class="buff"><span>Wブースト</span><span>${Math.ceil((gameData.boostUntil-Date.now())/1000)}s</span></div>`;
+  }
 }
 
 /* クリック */
-function performClick(e) {
-    const boost = Date.now() < gameData.boostUntil ? 2 : 1;
-    const gain = gameData.power * boost;
-    gameData.pts += gain;
-    gameData.xp += gain * 2;
-    playClickSound();
-    showRipple(e);
-    showGainText(gain);
-    updateDisplay();
+function performClick(e){
+  const b=Date.now()<gameData.boostUntil?2:1;
+  const g=gameData.power*b;
+  gameData.pts+=g; gameData.xp+=g*2;
+  playClickSound(); updateDisplay();
 }
 
-/* アイテム */
+/* ボス */
+function startBoss(){
+  bossData.active=true; bossData.hp=bossData.maxHp; bossData.time=30;
+  bossAreaElem.style.display="block"; bossStartBtnElem.disabled=true;
+  playBossStartSound(); updateBossUI();
+  bossData.timerId=setInterval(()=>{
+    bossData.time--; updateBossUI();
+    if(bossData.time<=0) endBoss(false);
+  },1000);
+}
+
+function attackBoss(e){
+  if(!bossData.active)return;
+  const dmg=gameData.power*(Date.now()<gameData.boostUntil?2:1);
+  bossData.hp-=dmg;
+  playAttackSound();
+  if(bossData.hp<=0) endBoss(true);
+  updateBossUI();
+}
+
+function updateBossUI(){
+  bossHpTextElem.innerText=`HP ${Math.max(0,bossData.hp)}/${bossData.maxHp}`;
+  bossHpBarElem.style.width=Math.max(0,bossData.hp/bossData.maxHp*100)+"%";
+  bossTimerElem.innerText=`残り ${bossData.time}s`;
+}
+
+function endBoss(win){
+  clearInterval(bossData.timerId);
+  bossData.active=false; bossAreaElem.style.display="none"; bossStartBtnElem.disabled=false;
+  if(win){
+    gameData.pts+=3000; gameData.xp+=500; playBossWinSound();
+  }else{
+    gameData.pts=Math.max(0,gameData.pts-300); playBossLoseSound();
+  }
+  updateDisplay();
+}
+
+/* ショップ */
 function buyItem(id,cost){
-    if(gameData.pts<cost)return;
-    gameData.pts-=cost;
-    if(id===1)gameData.power+=1;
-    if(id===2)gameData.autoAmount+=2;
-    if(id===3)gameData.power+=10;
-    if(id===4)gameData.autoAmount+=50;
-    if(id===5)gameData.boostUntil=Date.now()+60000;
-    playBuySound();
-    updateDisplay();
-    saveGame();
+  if(gameData.pts<cost) return alert("お金が足りません");
+  gameData.pts-=cost;
+  switch(id){
+    case 1: gameData.power+=1; break;
+    case 2: gameData.autoAmount+=1; break;
+    case 3: gameData.power+=3; break;
+    case 4: gameData.autoAmount+=5; break;
+    case 5: gameData.boostUntil=Date.now()+10000; break;
+  }
+  updateDisplay();
 }
 
 /* 自動 */
-setInterval(()=>{
-    if(gameData.autoAmount>0){
-        gameData.pts+=gameData.autoAmount;
-        gameData.xp+=gameData.autoAmount*0.1;
-        updateDisplay();
-    }
-    updateBuffDisplay();
-},1000);
-
-window.addEventListener("beforeunload",saveGame);
-
-loadGame();
-updateBuffDisplay();
+setInterval(()=>{if(gameData.autoAmount>0){gameData.pts+=gameData.autoAmount;} updateBuffDisplay();},1000);
 </script>
 
 </body>
