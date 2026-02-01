@@ -198,8 +198,12 @@ button.shop-btn {
     <button onclick="buyItem(5,3000)">3000G</button>
     <div class="desc">10秒間ダブルブースト。</div>
   </div>
-
-
+  <div class="item" id="item7">
+    リボーン
+    <button onclick="buyItem(7,3000000)">3000000G</button>
+    <div class="desc">倍率 +20%。レベルとGをリセット。Lv20で解禁。</div>
+  </div>
+</div>
 <script>
 let gameData = {
   pts: 0,
@@ -296,7 +300,8 @@ function updateDisplay(){
     document.getElementById("item3"),
     document.getElementById("item4"),
     document.getElementById("item5"),
-    document.getElementById("item6")
+    document.getElementById("item6"),
+    document.getElementById("item7")
   ];
   
   if(gameData.level >= 3) items[1].classList.add("unlocked");
@@ -304,6 +309,7 @@ function updateDisplay(){
   if(gameData.level >= 10) items[3].classList.add("unlocked");
   if(gameData.level >= 12) items[5].classList.add("unlocked");
   if(gameData.level >= 15) items[4].classList.add("unlocked");
+  if(gameData.level >= 20) items[6].classList.add("unlocked");
   
   document.getElementById("boss-start-btn").disabled = gameData.level < 10;
   saveGame();
@@ -413,6 +419,12 @@ function buyItem(id, cost){
     case 4: gameData.autoAmount += 5; break;
     case 5: gameData.boostUntil = Date.now() + 10000; break;
     case 6: gameData.power += 10; break;
+    case 7: 
+      gameData.rebirth += 1; 
+      gameData.level = 1;
+      gameData.xp = 0;
+      gameData.pts = 0;
+      break;
   }
   updateDisplay();
 }
