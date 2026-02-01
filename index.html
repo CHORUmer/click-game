@@ -213,6 +213,43 @@ let bossData = {
   timer: null
 };
 
+/* 効果音システム */
+let audioCtx = null;
+
+function initAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function playSE(frequency, duration = 0.1, volume = 0.3){
+  try{
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.frequency.value = frequency;
+    osc.type = 'sine';
+    
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + duration);
+  }catch(e){
+    console.log("効果音再生エラー:", e);
+  }
+}
+
+const playClickSound = () => playSE(700, 0.05, 0.2);
+const playBossStartSound = () => playSE(200, 0.3, 0.3);
+const playAttackSound = () => playSE(900, 0.08, 0.25);
+const playBossWinSound = () => playSE(1200, 0.3, 0.3);
+const playBossLoseSound = () => playSE(150, 0.4, 0.3);
+
 function saveGame(){
   localStorage.setItem("clickerSave", JSON.stringify(gameData));
 }
@@ -295,6 +332,7 @@ function performClick(e){
   document.body.appendChild(g);
   setTimeout(() => g.remove(), 1000);
 
+  playClickSound();
   updateDisplay();
 }
 
@@ -307,6 +345,7 @@ function startBoss(){
   document.getElementById("boss-area").style.display = "block";
   document.getElementById("boss-start-btn").disabled = true;
 
+  playBossStartSound();
   updateBossUI();
   
   clearInterval(bossData.timer);
@@ -321,6 +360,7 @@ function attackBoss(e){
   if(!bossData.active) return;
   const dmg = Math.floor(gameData.power * (1 + gameData.rebirth * 0.2));
   bossData.hp -= dmg;
+  playAttackSound();
   if(bossData.hp <= 0) endBoss(true);
   updateBossUI();
 }
@@ -343,8 +383,10 @@ function endBoss(win){
   if(win){
     gameData.pts = (gameData.pts || 0) + Math.floor(3000 * (1 + gameData.rebirth * 0.2));
     gameData.xp = (gameData.xp || 0) + 500;
+    playBossWinSound();
   }else{
     gameData.pts = Math.max(0, (gameData.pts || 0) - 300);
+    playBossLoseSound();
   }
   updateDisplay();
 }
