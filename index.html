@@ -282,15 +282,15 @@ function loadGame(){
   if(s){
     try{
       const parsed = JSON.parse(s);
-      // 数値フィールドは文字列で保存されている可能性があるため、明示的に数値化して代入
-      gameData.pts = Number(parsed.pts) || gameData.pts || 0;
-      gameData.xp = Number(parsed.xp) || gameData.xp || 0;
-      gameData.level = Number(parsed.level) || gameData.level || 1;
-      gameData.power = Number(parsed.power) || gameData.power || 1;
-      gameData.autoAmount = Number(parsed.autoAmount) || gameData.autoAmount || 0;
-      gameData.boostUntil = Number(parsed.boostUntil) || gameData.boostUntil || 0;
-      gameData.rebirth = Number(parsed.rebirth) || gameData.rebirth || 0;
-      // もし将来的にプロパティが増えていれば、その他は既存の値を保持する
+      // parsed のプロパティが定義されていればその値を数値化して代入する（0 を正しく扱うために || を使わない）
+      if(parsed.hasOwnProperty('pts')) gameData.pts = Number(parsed.pts);
+      if(parsed.hasOwnProperty('xp')) gameData.xp = Number(parsed.xp);
+      if(parsed.hasOwnProperty('level')) gameData.level = Number(parsed.level);
+      if(parsed.hasOwnProperty('power')) gameData.power = Number(parsed.power);
+      if(parsed.hasOwnProperty('autoAmount')) gameData.autoAmount = Number(parsed.autoAmount);
+      if(parsed.hasOwnProperty('boostUntil')) gameData.boostUntil = Number(parsed.boostUntil);
+      if(parsed.hasOwnProperty('rebirth')) gameData.rebirth = Number(parsed.rebirth);
+      // 不足する場合は既定値を保持する
     }catch(e){
       console.log("セーブデータ読み込みエラー:", e);
     }
@@ -444,12 +444,12 @@ function buyItem(id, cost){
   }
   gameData.pts = (Number(gameData.pts) || 0) - cost;
   switch(id){
-    case 1: gameData.power += 1; break;
-    case 2: gameData.autoAmount += 1; break;
-    case 3: gameData.power += 3; break;
-    case 4: gameData.autoAmount += 5; break;
+    case 1: gameData.power = (Number(gameData.power) || 0) + 1; break;
+    case 2: gameData.autoAmount = (Number(gameData.autoAmount) || 0) + 1; break;
+    case 3: gameData.power = (Number(gameData.power) || 0) + 3; break;
+    case 4: gameData.autoAmount = (Number(gameData.autoAmount) || 0) + 5; break;
     case 5: gameData.boostUntil = Date.now() + 10000; break;
-    case 6: gameData.power += 10; break;
+    case 6: gameData.power = (Number(gameData.power) || 0) + 10; break;
     case 7: 
       // 倍率を保持したまま、アイテムをリセット
       gameData.level = 1;
