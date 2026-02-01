@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
-  content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>RPGクリッカー：完全版</title>
 
@@ -11,20 +11,20 @@
 * { touch-action: manipulation; user-select: none; }
 
 body {
-  text-align: center;
-  font-family: sans-serif;
-  background-color: #121212;
-  color: #e0e0e0;
-  padding: 20px;
+ text-align: center;
+ font-family: sans-serif;
+ background-color: #121212;
+ color: #e0e0e0;
+ padding: 20px;
 }
 
 .header {
-  display: flex;
-  justify-content: space-around;
-  background: #1e1e1e;
-  padding: 15px;
-  border-radius: 15px;
-  margin-bottom: 20px;
+ display: flex;
+ justify-content: space-around;
+ background: #1e1e1e;
+ padding: 15px;
+ border-radius: 15px;
+ margin-bottom: 20px;
 }
 
 .stat-box { display: flex; flex-direction: column; }
@@ -32,93 +32,87 @@ body {
 .money-value { font-size: 24px; color: #f1c40f; font-weight: bold; }
 
 #xp-bar-container {
-  width: 200px; height: 10px; background: #333;
-  border-radius: 5px; margin: 5px auto;
+ width: 200px; height: 10px; background: #333;
+ border-radius: 5px; margin: 5px auto;
 }
 #xp-bar { height: 100%; background: #3498db; transition: 0.3s; }
 
 .main-btn {
-  position: relative;
-  width: 150px; height: 150px;
-  border-radius: 50%;
-  border: none;
-  background: #2980b9;
-  color: white;
-  font-size: 20px;
-  margin: 15px;
-  cursor: pointer;
+ position: relative;
+ width: 150px; height: 150px;
+ border-radius: 50%;
+ border: none;
+ background: #2980b9;
+ color: white;
+ font-size: 20px;
+ margin: 15px;
+ cursor: pointer;
+ overflow: hidden;
 }
 
 .ripple {
-  position: absolute;
-  width: 150px;
-  height: 150px;
-  margin-left: -75px;
-  margin-top: -75px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.4);
-  transform: scale(0);
-  pointer-events: none;
-  animation: ripple 0.6s linear;
+ position: absolute;
+ width: 150px;
+ height: 150px;
+ margin-left: -75px;
+ margin-top: -75px;
+ border-radius: 50%;
+ background: rgba(255,255,255,0.4);
+ transform: scale(0);
+ pointer-events: none;
+ animation: ripple 0.6s linear;
 }
 @keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
 .gain-text {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  color: #f1c40f;
-  font-weight: bold;
-  animation: floatUp 1s ease-out forwards;
-  pointer-events: none;
+ position: absolute;
+ transform: translate(-50%, -50%);
+ color: #f1c40f;
+ font-weight: bold;
+ animation: floatUp 1s ease-out forwards;
+ pointer-events: none;
 }
 @keyframes floatUp {
-  from { opacity: 1; transform: translate(-50%,0); }
-  to { opacity: 0; transform: translate(-50%,-40px); }
+ from { opacity: 1; transform: translate(-50%,0); }
+ to { opacity: 0; transform: translate(-50%,-40px); }
 }
 
 #buff-container {
-  max-width: 300px;
-  margin: 10px auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+ max-width: 300px;
+ margin: 10px auto;
+ display: flex;
+ flex-direction: column;
+ gap: 8px;
 }
 
 .buff {
-  background: #1e1e1e;
-  border: 1px solid #555;
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  justify-content: space-between;
+ background: #1e1e1e;
+ border: 1px solid #555;
+ border-radius: 8px;
+ padding: 8px;
+ display: flex;
+ justify-content: space-between;
 }
 
 .shop {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  max-width: 800px;
-  margin: 20px auto;
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+ gap: 15px;
+ max-width: 800px;
+ margin: 20px auto;
 }
 
-.item { background:#1e1e1e; padding:15px; border-radius:12px; display:none; position:relative; }
+.item { background:#1e1e1e; padding:15px; border-radius:12px; display:none; }
 .item.unlocked { display:block; }
 .item button { margin-top:8px; }
 
-.item .desc {
-  margin-top:8px;
-  font-size:13px;
-  color:#bdbdbd;
-  line-height:1.3;
-}
-
 #boss-area {
-  display:none;
-  background:#1e1e1e;
-  padding:15px;
-  border-radius:15px;
-  margin:15px auto;
-  max-width:300px;
+ display:none;
+ background:#1e1e1e;
+ padding:15px;
+ border-radius:15px;
+ margin:15px auto;
+ max-width:300px;
 }
 </style>
 </head>
@@ -126,107 +120,61 @@ body {
 <body>
 
 <div class="header">
-  <div class="stat-box">
-    <span>LEVEL</span>
-    <span class="xp-value">Lv.<span id="level">1</span></span>
-    <div id="xp-bar-container"><div id="xp-bar"></div></div>
-  </div>
-  <div class="stat-box">
-    <span>MONEY</span>
-    <span class="money-value"><span id="pts">0</span> G</span>
-  </div>
+ <div class="stat-box">
+   <span>LEVEL</span>
+   <span class="xp-value">Lv.<span id="level">1</span></span>
+   <div id="xp-bar-container"><div id="xp-bar"></div></div>
+ </div>
+ <div class="stat-box">
+   <span>MONEY</span>
+   <span class="money-value"><span id="pts">0</span> G</span>
+ </div>
 </div>
 
 <button class="main-btn" onclick="performClick(event)">CLICK!</button>
-
 <div id="buff-container"></div>
 
 <button id="boss-start-btn" onclick="startBoss()">⚔️ ボスに挑む</button>
 
 <div id="boss-area">
-  <h3>ゴブリン王</h3>
-  <div id="boss-hp-text"></div>
-  <div style="background:#333;height:10px;border-radius:5px;">
-    <div id="boss-hp-bar" style="height:100%;background:#e74c3c;"></div>
-  </div>
-  <div id="boss-timer"></div>
-  <button class="main-btn" style="background:#c0392b" onclick="attackBoss(event)">ATTACK!</button>
-</div>
-
-<div class="shop">
-  <div class="item unlocked" id="item1">
-    木刀
-    <button onclick="buyItem(1,50)">50G</button>
-    <div class="desc">攻撃力 +1。序盤の基本武器。コストパフォーマンスが良い。</div>
-  </div>
-
-  <div class="item" id="item2">
-    見習い召喚師
-    <button onclick="buyItem(2,200)">200G</button>
-    <div class="desc">毎秒自動で +1G を生成する自動収入ユニット。レベル3で解禁。</div>
-  </div>
-
-  <div class="item" id="item3">
-    銀の剣
-    <button onclick="buyItem(3,800)">800G</button>
-    <div class="desc">攻撃力 +3。クリックの効率を大幅に向上させる中級武器。</div>
-  </div>
-
-  <div class="item" id="item4">
-    ドラゴンの巣
-    <button onclick="buyItem(4,5000)">5000G</button>
-    <div class="desc">自動生成量 +5。長期的な稼ぎに有効な高価アイテム。</div>
-  </div>
-
-  <div class="item" id="item5">
-    Wブースト
-    <button onclick="buyItem(5,3000)">3000G</button>
-    <div class="desc">購入時に10秒間ダブルブースト。経験値と獲得Gが2倍になる。</div>
-  </div>
+ <h3>ゴブリン王</h3>
+ <div id="boss-rank"></div>
+ <div id="boss-hp-text"></div>
+ <div style="background:#333;height:10px;border-radius:5px;">
+   <div id="boss-hp-bar" style="height:100%;background:#e74c3c;"></div>
+ </div>
+ <div id="boss-timer"></div>
+ <button class="main-btn" style="background:#c0392b" onclick="attackBoss(event)">ATTACK!</button>
 </div>
 
 <script>
-let gameData={pts:0,xp:0,level:1,power:1,autoAmount:0,boostUntil:0};
-let bossData={active:false,maxHp:1000,hp:1000,time:30,timerId:null};
+let gameData={
+ pts:0,xp:0,level:1,power:1,
+ autoAmount:0,boostUntil:0,
+ moneyBonus:0,rebirth:0
+};
 
-/* 要素の取得 */
-const ptsElem = document.getElementById('pts');
-const levelElem = document.getElementById('level');
-const xpBarElem = document.getElementById('xp-bar');
-const buffContainerElem = document.getElementById('buff-container');
-const bossStartBtnElem = document.getElementById('boss-start-btn');
-const bossAreaElem = document.getElementById('boss-area');
-const bossHpTextElem = document.getElementById('boss-hp-text');
-const bossHpBarElem = document.getElementById('boss-hp-bar');
-const bossTimerElem = document.getElementById('boss-timer');
-const item1 = document.getElementById('item1');
-const item2 = document.getElementById('item2');
-const item3 = document.getElementById('item3');
-const item4 = document.getElementById('item4');
-const item5 = document.getElementById('item5');
-const clickBtn = document.querySelector('.main-btn');
+let bossData={
+ active:false,
+ baseHp:1000,
+ maxHp:1000,
+ hp:1000,
+ baseTime:10,
+ time:10,
+ timerId:null
+};
 
 /* 効果音 */
 let audioCtx;
-function initAudio(){
-  if(!audioCtx){
-    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  }
-}
-
 function playSE(f,d=0.1){
-  try{
-    initAudio();
-    const o=audioCtx.createOscillator();
-    const g=audioCtx.createGain();
-    o.frequency.value=f;
-    g.gain.setValueAtTime(0.08,audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+d);
-    o.connect(g);
-    g.connect(audioCtx.destination);
-    o.start(audioCtx.currentTime);
-    o.stop(audioCtx.currentTime+d);
-  }catch(e){console.log("音声再生エラー:",e);}
+ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+ const o=audioCtx.createOscillator();
+ const g=audioCtx.createGain();
+ o.frequency.value=f;
+ g.gain.setValueAtTime(0.08,audioCtx.currentTime);
+ g.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+d);
+ o.connect(g); g.connect(audioCtx.destination);
+ o.start(); o.stop(audioCtx.currentTime+d);
 }
 
 const playClickSound=()=>playSE(700,0.05);
@@ -235,160 +183,111 @@ const playBossStartSound=()=>playSE(180,0.4);
 const playBossWinSound=()=>playSE(1200,0.4);
 const playBossLoseSound=()=>playSE(120,0.5);
 
-/* セーブ/ロード */
-function saveGame(){
-  localStorage.setItem('gameData',JSON.stringify(gameData));
-}
-
-function loadGame(){
-  const saved=localStorage.getItem('gameData');
-  if(saved){
-    gameData=JSON.parse(saved);
-  }
-}
-
 /* 表示 */
 const format=n=>Math.floor(n).toLocaleString();
 const getNextXP=lv=>Math.floor(100*Math.pow(1.5,lv-1));
 
 function updateDisplay(){
-  let need=getNextXP(gameData.level);
-  while(gameData.xp>=need){gameData.xp-=need;gameData.level++;need=getNextXP(gameData.level);}
-  ptsElem.innerText=format(gameData.pts);
-  levelElem.innerText=gameData.level;
-  xpBarElem.style.width=(gameData.xp/need*100)+"%";
-  if(gameData.level>=3)item2.classList.add("unlocked");
-  if(gameData.level>=5)item3.classList.add("unlocked");
-  if(gameData.level>=10)item4.classList.add("unlocked");
-  if(gameData.level>=15)item5.classList.add("unlocked");
-  bossStartBtnElem.disabled=gameData.level<10;
-  saveGame();
+ let need=getNextXP(gameData.level);
+ while(gameData.xp>=need){gameData.xp-=need;gameData.level++;need=getNextXP(gameData.level);}
+ document.getElementById("pts").innerText=format(gameData.pts);
+ document.getElementById("level").innerText=gameData.level;
+ document.getElementById("xp-bar").style.width=(gameData.xp/need*100)+"%";
 }
 
 /* バフ */
 function updateBuffDisplay(){
-  buffContainerElem.innerHTML="";
-  if(gameData.boostUntil>Date.now()){
-    buffContainerElem.innerHTML=`<div class="buff"><span>Wブースト</span><span>${Math.ceil((gameData.boostUntil-Date.now())/1000)}s</span></div>`;
-  }
-}
-
-/* エラーメッセージ表示 */
-function showErrorMessage(msg){
-  const div=document.createElement('div');
-  div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#c0392b;color:white;padding:20px 30px;border-radius:10px;font-size:16px;z-index:9999;font-weight:bold;';
-  div.innerText=msg;
-  document.body.appendChild(div);
-  setTimeout(()=>div.remove(),2000);
+ const b=document.getElementById("buff-container");
+ b.innerHTML="";
+ if(gameData.boostUntil>Date.now()){
+   b.innerHTML=`<div class="buff"><span>Wブースト</span><span>${Math.ceil((gameData.boostUntil-Date.now())/1000)}s</span></div>`;
+ }
 }
 
 /* クリック */
 function performClick(e){
-  const b=Date.now()<gameData.boostUntil?2:1;
-  const g=gameData.power*b;
-  gameData.pts+=g;
-  gameData.xp+=g*2;
-  
-  /* 波紋エフェクト */
-  const ripple=document.createElement('div');
-  ripple.className='ripple';
-  ripple.style.left=(e.clientX)+'px';
-  ripple.style.top=(e.clientY)+'px';
-  document.body.appendChild(ripple);
-  setTimeout(()=>ripple.remove(),300);
-  
-  /* +G表示 */
-  const gainText=document.createElement('div');
-  gainText.className='gain-text';
-  gainText.innerText='+'+format(g);
-  gainText.style.left=(e.clientX)+'px';
-  gainText.style.top=(e.clientY)+'px';
-  document.body.appendChild(gainText);
-  setTimeout(()=>gainText.remove(),1000);
-  
-  playClickSound();
-  updateDisplay();
+ const boost=Date.now()<gameData.boostUntil?2:1;
+ const gain=Math.floor((gameData.power+gameData.moneyBonus)*boost*(1+gameData.rebirth*0.2));
+ gameData.pts+=gain;
+ gameData.xp+=gain*2;
+
+ const g=document.createElement("div");
+ g.className="gain-text";
+ g.innerText="+"+format(gain);
+ g.style.left=e.clientX+"px";
+ g.style.top=e.clientY+"px";
+ document.body.appendChild(g);
+ setTimeout(()=>g.remove(),1000);
+
+ playClickSound();
+ updateDisplay();
 }
 
 /* ボス */
 function startBoss(){
-  bossData.active=true;
-  bossData.hp=bossData.maxHp;
-  bossData.time=10;
-  bossAreaElem.style.display="block";
-  bossStartBtnElem.disabled=true;
-  playBossStartSound();
-  updateBossUI();
-  bossData.timerId=setInterval(()=>{
-    bossData.time--;
-    updateBossUI();
-    if(bossData.time<=0) endBoss(false);
-  },1200);
+ bossData.active=true;
+ const r=gameData.rebirth;
+ bossData.maxHp=Math.floor(bossData.baseHp*(1+r*0.5));
+ bossData.hp=bossData.maxHp;
+ bossData.time=Math.max(5,bossData.baseTime-r);
+
+ document.getElementById("boss-area").style.display="block";
+ document.getElementById("boss-start-btn").disabled=true;
+
+ playBossStartSound();
+ updateBossUI();
+
+ bossData.timerId=setInterval(()=>{
+   bossData.time--;
+   updateBossUI();
+   if(bossData.time<=0) endBoss(false);
+ },1000);
 }
 
-function attackBoss(e){
-  if(!bossData.active)return;
-  const dmg=gameData.power*(Date.now()<gameData.boostUntil?2:1);
-  bossData.hp-=dmg;
-  playAttackSound();
-  if(bossData.hp<=0) endBoss(true);
-  updateBossUI();
+function attackBoss(){
+ if(!bossData.active)return;
+ const dmg=(gameData.power+gameData.moneyBonus)*(Date.now()<gameData.boostUntil?2:1);
+ bossData.hp-=dmg;
+ playAttackSound();
+ if(bossData.hp<=0) endBoss(true);
+ updateBossUI();
 }
 
 function updateBossUI(){
-  bossHpTextElem.innerText=`HP ${Math.max(0,Math.floor(bossData.hp))}/${bossData.maxHp}`;
-  bossHpBarElem.style.width=Math.max(0,bossData.hp/bossData.maxHp*100)+"%";
-  bossTimerElem.innerText=`残り ${bossData.time}s`;
+ document.getElementById("boss-hp-text").innerText=
+  `HP ${Math.max(0,Math.floor(bossData.hp))}/${bossData.maxHp}`;
+ document.getElementById("boss-hp-bar").style.width=
+  Math.max(0,bossData.hp/bossData.maxHp*100)+"%";
+ document.getElementById("boss-timer").innerText=`残り ${bossData.time}s`;
+ document.getElementById("boss-rank").innerText=`強化段階：★${gameData.rebirth}`;
 }
 
 function endBoss(win){
-  clearInterval(bossData.timerId);
-  bossData.active=false;
-  bossAreaElem.style.display="none";
-  bossStartBtnElem.disabled=false;
-  if(win){
-    gameData.pts+=3000;
-    gameData.xp+=500;
-    playBossWinSound();
-  }else{
-    gameData.pts=Math.max(0,gameData.pts-300);
-    playBossLoseSound();
-  }
-  updateDisplay();
-}
+ clearInterval(bossData.timerId);
+ bossData.active=false;
+ document.getElementById("boss-area").style.display="none";
+ document.getElementById("boss-start-btn").disabled=false;
 
-/* ショップ */
-function buyItem(id,cost){
-  if(gameData.pts<cost){
-    showErrorMessage("お金が足りません");
-    return;
-  }
-  gameData.pts-=cost;
-  switch(id){
-    case 1: gameData.power+=1; break;
-    case 2: gameData.autoAmount+=1; break;
-    case 3: gameData.power+=3; break;
-    case 4: gameData.autoAmount+=5; break;
-    case 5: gameData.boostUntil=Date.now()+10000; break;
-  }
-  updateDisplay();
+ if(win){
+   const bonus=1+gameData.rebirth*0.2;
+   gameData.pts+=Math.floor(3000*bonus);
+   gameData.xp+=Math.floor(500*bonus);
+   playBossWinSound();
+ }else{
+   gameData.pts=Math.max(0,gameData.pts-300);
+   playBossLoseSound();
+ }
+ updateDisplay();
 }
-
-/* 初期化 */
-loadGame();
-updateDisplay();
 
 /* 自動 */
 setInterval(()=>{
-  if(gameData.autoAmount>0 && !bossData.active){
-    gameData.pts+=gameData.autoAmount;
-    updateDisplay();
-  }
-  updateBuffDisplay();
+ if(gameData.autoAmount>0 && !bossData.active){
+   gameData.pts+=gameData.autoAmount;
+   updateDisplay();
+ }
+ updateBuffDisplay();
 },1000);
-
-/* ページ離脱時に自動保存 */
-window.addEventListener('beforeunload',()=>{saveGame();});
 </script>
 
 </body>
