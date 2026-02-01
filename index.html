@@ -152,10 +152,13 @@ button.shop-btn {
 <button class="main-btn" onclick="performClick(event)">CLICK!</button>
 <div id="buff-container"></div>
 
-<button class="shop-btn" id="boss-start-btn" onclick="startBoss()">⚔️ ボスに挑む</button>
+<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:10px;">
+  <button class="shop-btn" id="goblin-boss-btn" onclick="startBoss('goblin')">⚔️ ゴブリン王に挑む</button>
+  <button class="shop-btn" id="dragon-boss-btn" onclick="startBoss('dragon')" style="display:none;">🐉 炎竜に挑む</button>
+</div>
 
 <div id="boss-area">
-  <h3>ゴブリン王</h3>
+  <h3 id="boss-name">ゴブリン王</h3>
   <div id="boss-rank"></div>
   <div id="boss-hp-text"></div>
   <div style="background:#333;height:10px;border-radius:5px;">
@@ -221,7 +224,11 @@ let gameData = {
 
 let bossData = {
   active: false,
-  baseHp: 1000,
+  currentBoss: null,
+  bosses: {
+    goblin: { name: 'ゴブリン王', baseHp: 1000, time: 10 },
+    dragon: { name: '炎竜', baseHp: 10000, time: 10 }
+  },
   hp: 1000,
   maxHp: 1000,
   time: 10,
@@ -317,6 +324,10 @@ function updateDisplay(){
   if(gameData.level >= 15) items[4].classList.add("unlocked");
   if(gameData.level >= 20) items[6].classList.add("unlocked");
   
+  if(gameData.level >= 20) {
+    document.getElementById("dragon-boss-btn").style.display = "inline-block";
+  }
+  
   document.getElementById("boss-start-btn").disabled = gameData.level < 10;
   saveGame();
 }
@@ -357,14 +368,18 @@ function performClick(e){
   updateDisplay();
 }
 
-function startBoss(){
-  bossData.maxHp = Math.floor(1000 * (1 + gameData.rebirth * 1));
+function startBoss(bossType = 'goblin'){
+  bossData.currentBoss = bossType;
+  const boss = bossData.bosses[bossType];
+  bossData.maxHp = Math.floor(boss.baseHp * (1 + gameData.rebirth * 0.2));
   bossData.hp = bossData.maxHp;
   bossData.active = true;
-  bossData.time = Math.max(5, 10 - gameData.rebirth);
+  bossData.time = boss.time;
   
+  document.getElementById("boss-name").innerText = boss.name;
   document.getElementById("boss-area").style.display = "block";
-  document.getElementById("boss-start-btn").disabled = true;
+  document.getElementById("goblin-boss-btn").disabled = true;
+  document.getElementById("dragon-boss-btn").disabled = true;
 
   playBossStartSound();
   updateBossUI();
@@ -399,7 +414,8 @@ function endBoss(win){
   clearInterval(bossData.timer);
   bossData.active = false;
   document.getElementById("boss-area").style.display = "none";
-  document.getElementById("boss-start-btn").disabled = false;
+  document.getElementById("goblin-boss-btn").disabled = false;
+  document.getElementById("dragon-boss-btn").disabled = false;
   
   if(win){
     gameData.pts = (gameData.pts || 0) + Math.floor(3000 * (1 + gameData.rebirth * 0.2));
