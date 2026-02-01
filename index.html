@@ -371,10 +371,10 @@ function performClick(e){
 function startBoss(bossType = 'goblin'){
   bossData.currentBoss = bossType;
   const boss = bossData.bosses[bossType];
-  bossData.maxHp = Math.floor(boss.baseHp * (1 + gameData.rebirth * 0.2));
+  bossData.maxHp = Math.floor(boss.baseHp * (1 + gameData.rebirth * 0.5));
   bossData.hp = bossData.maxHp;
   bossData.active = true;
-  bossData.time = boss.time;
+  bossData.time = Math.max(2, boss.time - gameData.rebirth);
   
   document.getElementById("boss-name").innerText = boss.name;
   document.getElementById("boss-area").style.display = "block";
