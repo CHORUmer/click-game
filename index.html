@@ -145,10 +145,11 @@ button.shop-btn {
   </div>
   <div class="stat-box">
     <span>REBIRTH</span>
-    <span class="xp-value">×<span id="rebirth-multiplier">1.0</span></span>
+    <span class="xp-value" style="display:none;">×<span id="rebirth-multiplier">1.0</span></span>
   </div>
 </div>
 
+<div id="multiplier-top" style="margin:0 auto 12px; font-size:18px; font-weight:bold; color:#f1c40f;">倍率 ×<span id="rebirth-multiplier-top">1.0</span></div>
 <button class="main-btn" onclick="performClick(event)">CLICK!</button>
 <div id="buff-container"></div>
 
@@ -314,7 +315,11 @@ function updateDisplay(){
   document.getElementById("pts").innerText = format(gameData.pts);
   document.getElementById("level").innerText = gameData.level;
   document.getElementById("xp-bar").style.width = (gameData.xp / need * 100) + "%";
-  document.getElementById("rebirth-multiplier").innerText = (1 + gameData.rebirth * 0.2).toFixed(1);
+  const multText = (1 + gameData.rebirth * 0.2).toFixed(1);
+  const headerMult = document.getElementById("rebirth-multiplier");
+  if(headerMult) headerMult.innerText = multText;
+  const topMult = document.getElementById("rebirth-multiplier-top");
+  if(topMult) topMult.innerText = multText;
   
   const items = [
     document.getElementById("item1"),
