@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>RPGクリッカー：完全版</title>
 
+
 <style>
 * { touch-action: manipulation; user-select: none; }
 
@@ -141,8 +142,103 @@ button.shop-btn {
   border:none;
   border-radius:5px;
   cursor:pointer;
-  font-size:16px;
+  font-size:25px;
 }
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+#menu-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1e1e1e;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #333;
+}
+
+#menu-bar button {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  font-size: 22px;
+}
+
+#gacha-result {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #f1c40f;
+}
+
+/* ===== ガチャ演出 ===== */
+#gacha-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+#gacha-box {
+  width: 260px;
+  height: 260px;
+  background: #222;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+  animation: gacha-spin 1s linear infinite;
+}
+
+@keyframes gacha-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.gacha-rare {
+  background: radial-gradient(circle, #3498db, #1e1e1e);
+  box-shadow: 0 0 20px #3498db;
+}
+
+.gacha-super {
+  background: radial-gradient(circle, #f1c40f, #1e1e1e);
+  box-shadow: 0 0 30px #f1c40f;
+  animation: flash 0.5s infinite alternate;
+}
+
+.gacha-ultra {
+  background: linear-gradient(45deg,
+    red, orange, yellow, green, cyan, blue, violet);
+  color: black;
+  box-shadow: 0 0 40px white;
+  animation: ultra 0.2s infinite;
+}
+
+@keyframes flash {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+@keyframes ultra {
+  from { transform: scale(1) rotate(-2deg); }
+  to { transform: scale(1.05) rotate(2deg); }
+}
+
+
 </style>
 </head>
 
@@ -224,6 +320,41 @@ button.shop-btn {
     <div class="desc">倍率 +50%。レベルとGをリセット。Lv20で解禁。</div>
   </div>
 </div>
+
+
+
+<div class="item unlocked">
+  🎰 武器ガチャ
+  <button onclick="drawGacha()">5000G</button>
+  <div class="desc">
+    ランダムで攻撃力が上昇するガチャ。<br>
+    レア排出あり！
+  </div>
+  <div id="gacha-result"></div>
+</div>
+<div id="main" class="screen active">
+  <!-- メイン画面 -->
+</div>
+
+<div id="shop" class="screen">
+  <!-- ショップ画面 -->
+</div>
+
+<div id="menu-bar">
+  <button onclick="showScreen('main')">🏠</button>
+  <button onclick="showScreen('menu')">☰</button>
+</div>
+
+<div id="screen-main" class="screen">…メイン画面…</div>
+<div id="screen-shop" class="screen">…ショップ…</div>
+<div id="screen-boss" class="screen">…ボス画面…</div>
+<div id="screen-menu" class="screen">
+  <h3>メニュー</h3>
+  <button onclick="toggleSound()">🔊 効果音</button>
+  <div id="status-box"></div>
+</div>
+
+
 <script>
 let gameData = {
   pts: 0,
@@ -248,36 +379,39 @@ let bossData = {
   timer: null
 };
 
-/* 効果音システム */
-let audioCtx = null;
+/* ===== 安定版 効果音システム ===== */
+let audioCtx;
+let seEnabled = true;
 
-function initAudio(){
+function initAudioOnce(){
   if(!audioCtx){
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-}
-
-function playSE(frequency, duration = 0.1, volume = 0.3){
-  try{
-    initAudio();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    
-    osc.frequency.value = frequency;
-    osc.type = 'sine';
-    
-    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-    
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    
-    osc.start(audioCtx.currentTime);
-    osc.stop(audioCtx.currentTime + duration);
-  }catch(e){
-    console.log("効果音再生エラー:", e);
+  if(audioCtx.state === "suspended"){
+    audioCtx.resume();
   }
 }
+
+function playSE(freq, duration = 0.1, volume = 0.2){
+  if(!seEnabled) return;
+
+  initAudioOnce();
+
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = "sine";
+  osc.frequency.value = freq;
+
+  gain.gain.value = volume;
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
 
 const playClickSound = () => playSE(700, 0.05, 0.2);
 const playBossStartSound = () => playSE(200, 0.3, 0.3);
@@ -287,6 +421,10 @@ const playBossLoseSound = () => playSE(150, 0.4, 0.3);
 const playBuySound = () => playSE(500, 0.15, 0.25);
 
 const playErrorSound = () => playSE(180, 0.12, 0.28);
+
+document.addEventListener("touchstart", initAudioOnce, { once:true });
+document.addEventListener("click", initAudioOnce, { once:true });
+
 
 function showMessage(msg, duration = 1500){
   try{
@@ -303,6 +441,12 @@ function showMessage(msg, duration = 1500){
     setTimeout(() => el.remove(), 300);
   }, duration);
 }
+
+function toggleSound(){
+  seEnabled = !seEnabled;
+  showMessage(seEnabled ? "🔊 効果音ON" : "🔇 効果音OFF");
+}
+
 
 function saveGame(){
   localStorage.setItem("clickerSave", JSON.stringify(gameData));
@@ -385,6 +529,7 @@ function updateBuffDisplay(){
     buffContainer.innerHTML = `<div class="buff"><span>Wブースト</span><span>${Math.ceil((gameData.boostUntil - Date.now()) / 1000)}s</span></div>`;
   }
 }
+
 
 function performClick(e){
   const boost = Date.now() < gameData.boostUntil ? 2 : 1;
@@ -475,11 +620,81 @@ function endBoss(win){
   updateDisplay();
 }
 
+function showScreen(name){
+  document.querySelectorAll('.screen')
+    .forEach(s => s.classList.remove('active'));
+
+  document.getElementById('screen-' + name)
+    .classList.add('active');
+}
+
+showScreen('main');
+
+function drawGacha(){
+  const cost = 5000;
+  if(gameData.pts < cost){
+    showMessage("Gが足りません");
+    return;
+  }
+
+  gameData.pts -= cost;
+  updateDisplay();
+
+  const overlay = document.getElementById("gacha-overlay");
+  const box = document.getElementById("gacha-box");
+  const text = document.getElementById("gacha-text");
+
+  overlay.style.display = "flex";
+  box.className = "";
+  text.innerText = "抽選中…";
+
+  playBuySound();
+
+  setTimeout(() => {
+    const r = Math.random() * 100;
+    let powerGain = 0;
+    let resultText = "";
+
+    if(r < 60){
+      powerGain = 10;
+      resultText = "ノーマル\n攻撃力 +10";
+    }else if(r < 85){
+      powerGain = 50;
+      resultText = "レア！\n攻撃力 +50";
+      box.classList.add("gacha-rare");
+    }else if(r < 95){
+      powerGain = 100;
+      resultText = "スーパーレア！！\n攻撃力 +100";
+      box.classList.add("gacha-super");
+    }else{
+      powerGain = 500;
+      resultText = "✨ウルトラレア✨\n攻撃力 +500";
+      box.classList.add("gacha-ultra");
+    }
+
+    gameData.power += powerGain;
+    text.innerText = resultText;
+
+    playBossWinSound();
+    updateDisplay();
+
+    setTimeout(() => {
+      overlay.style.display = "none";
+      document.getElementById("gacha-result").innerText =
+        resultText.replace("\n", " ");
+    }, 1800);
+
+  }, 1500);
+}
+
+
 function buyItem(id, cost){
   if((Number(gameData.pts) || 0) < cost){
     showMessage("お金が足りません");
     return;
   }
+
+
   gameData.pts = (Number(gameData.pts) || 0) - cost;
   switch(id){
     case 1: gameData.power = (Number(gameData.power) || 0) + 1; break;
@@ -518,7 +733,15 @@ setInterval(() => {
 }, 1000);
 
 window.addEventListener("beforeunload", saveGame);
+
 </script>
+
+<!-- ガチャ演出 -->
+<div id="gacha-overlay">
+  <div id="gacha-box">
+    <div id="gacha-text">抽選中…</div>
+  </div>
+</div>
 
 </body>
 </html>
