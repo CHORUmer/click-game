@@ -38,7 +38,7 @@ body {
 
 .main-btn {
   position: relative;
-  width: 150px; height: 150px;
+  width: 170px; height: 170px;
   border-radius: 50%;
   border: none;
   background: #2980b9;
@@ -203,7 +203,7 @@ button.shop-btn {
   <div class="item" id="item4">
     ドラゴンの巣
     <button onclick="buyItem(4,5000)">5000G</button>
-    <div class="desc">自動生成 +5。Lv10で解禁。</div>
+    <div class="desc">自動生成 +5G。Lv10で解禁。</div>
   </div>
 
   <div class="item" id="item5">
@@ -221,7 +221,7 @@ button.shop-btn {
   <div class="item" id="item7">
     リボーン
     <button onclick="buyItem(7,3000000)">3000000G</button>
-    <div class="desc">倍率 +20%。レベルとGをリセット。Lv20で解禁。</div>
+    <div class="desc">倍率 +50%。レベルとGをリセット。Lv20で解禁。</div>
   </div>
 </div>
 <script>
@@ -239,7 +239,7 @@ let bossData = {
   active: false,
   currentBoss: null,
   bosses: {
-    goblin: { name: 'ゴブリン王', baseHp: 3000, time: 10 },
+    goblin: { name: 'ゴブリン王', baseHp: 4500, time: 10 },
     dragon: { name: '炎竜', baseHp: 30000, time: 10 }
   },
   hp: 1000,
@@ -345,7 +345,7 @@ function updateDisplay(){
   document.getElementById("pts").innerText = format(gameData.pts);
   document.getElementById("level").innerText = gameData.level;
   document.getElementById("xp-bar").style.width = (gameData.xp / need * 100) + "%";
-  const multText = (1 + gameData.rebirth * 0.2).toFixed(1);
+  const multText = (1 + gameData.rebirth * 0.5).toFixed(1);
   const headerMult = document.getElementById("rebirth-multiplier");
   if(headerMult) headerMult.innerText = multText;
   const topMult = document.getElementById("rebirth-multiplier-top");
@@ -388,7 +388,7 @@ function updateBuffDisplay(){
 
 function performClick(e){
   const boost = Date.now() < gameData.boostUntil ? 2 : 1;
-  const gain = Math.floor(gameData.power * boost * (1 + gameData.rebirth * 0.2));
+  const gain = Math.floor(gameData.power * boost * (1 + gameData.rebirth * 0.5));
 
   gameData.pts = (Number(gameData.pts) || 0) + gain;
   gameData.xp = (Number(gameData.xp) || 0) + gain * 2;
@@ -440,7 +440,7 @@ function startBoss(bossType = 'goblin'){
 
 function attackBoss(e){
   if(!bossData.active) return;
-  const dmg = Math.floor(gameData.power * (1 + gameData.rebirth * 0.2));
+  const dmg = Math.floor(gameData.power * (1 + gameData.rebirth * 0.5));
   bossData.hp -= dmg;
   playAttackSound();
   if(bossData.hp <= 0) endBoss(true);
@@ -464,12 +464,12 @@ function endBoss(win){
   document.getElementById("dragon-boss-btn").disabled = false;
   
   if(win){
-    const bossRewardMult = (1 + gameData.rebirth * 0.2);
+    const bossRewardMult = (1 + gameData.rebirth * 0.5);
     gameData.pts = (gameData.pts || 0) + Math.floor(3000 * bossRewardMult);
     gameData.xp = (gameData.xp || 0) + Math.floor(500 * bossRewardMult);
     playBossWinSound();
   }else{
-    gameData.pts = Math.max(0, (gameData.pts || 0) - 300);
+    gameData.pts = Math.max(0, (gameData.pts || 0) -  3000);
     playBossLoseSound();
   }
   updateDisplay();
