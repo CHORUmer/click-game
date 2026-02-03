@@ -250,6 +250,13 @@ button.shop-btn {
     <span class="xp-value">Lv.<span id="level">1</span></span>
     <div id="xp-bar-container"><div id="xp-bar"></div></div>
   </div>
+
+  <div class="stat-box">
+  <span>SCORE</span>
+  <span id="score-value" style="color: #2ecc71; font-weight: bold;">0</span>
+  <div style="font-size: 10px;">BEST: <span id="high-score-value">0</span></div>
+</div>
+
   <div class="stat-box">
     <span>MONEY</span>
     <span class="money-value"><span id="pts">0</span> G</span>
@@ -359,7 +366,9 @@ let gameData = {
   power: 1,
   autoAmount: 0,
   boostUntil: 0,
-  rebirth: 0
+  rebirth: 0,
+  totalScore: 0, // 累計スコア（今まで稼いだ全金額）
+  highScore: 0   // ハイスコア（過去最高の累計スコア）
 };
 
 let bossData = {
@@ -681,6 +690,27 @@ function drawGacha(){
     }, 1800);
 
   }, 1500);
+}
+
+function updateScore(amount) {
+  gameData.totalScore += amount;
+  
+  // ハイスコアを更新
+  if (gameData.totalScore > gameData.highScore) {
+    gameData.highScore = gameData.totalScore;
+  }
+  
+  // UIの更新
+  document.getElementById('score-value').innerText = Math.floor(gameData.totalScore).toLocaleString();
+  document.getElementById('high-score-value').innerText = Math.floor(gameData.highScore).toLocaleString();
+}
+
+// 例：クリック時に呼び出す
+function performClick(event) {
+  let gain = gameData.power * (1 + gameData.rebirth * 0.5);
+  gameData.pts += gain;
+  updateScore(gain); // ここでスコアも加算！
+  // ...既存の処理...
 }
 
 
