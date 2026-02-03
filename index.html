@@ -251,11 +251,6 @@ button.shop-btn {
     <div id="xp-bar-container"><div id="xp-bar"></div></div>
   </div>
 
-  <div class="stat-box">
-  <span>SCORE</span>
-  <span id="score-value" style="color: #2ecc71; font-weight: bold;">0</span>
-  <div style="font-size: 10px;">BEST: <span id="high-score-value">0</span></div>
-</div>
 
   <div class="stat-box">
     <span>MONEY</span>
@@ -366,10 +361,8 @@ let gameData = {
   power: 1,
   autoAmount: 0,
   boostUntil: 0,
-  rebirth: 0,
-  totalScore: 0,
-  highScore: 0,
-  userName: "冒険者"
+  rebirth: 0
+
 };
 
 let bossData = {
@@ -463,20 +456,26 @@ function saveGame() {
   localStorage.setItem('rpgClickerSave', JSON.stringify(gameData));
 }
 
-function loadGame() {
-  const saved = localStorage.getItem('rpgClickerSave');
-  if (saved) {
-    const loadedData = JSON.parse(saved);
-    // 既存のgameDataにロードしたデータを統合（新しい項目が消えないようにする）
-    gameData = Object.assign(gameData, loadedData);
-    
-    // 数値が壊れている場合の保険
-    if (isNaN(gameData.pts)) gameData.pts = 0;
-    if (isNaN(gameData.totalScore)) gameData.totalScore = 0;
-    if (isNaN(gameData.highScore)) gameData.highScore = 0;
-  }
-  updateUI(); // 画面を更新
+function loadGame(){
+ const s = localStorage.getItem("clickerSave");
+ if(s){
+   try{
+     const parsed = JSON.parse(s);
+     // parsed のプロパティが定義されていればその値を数値化して代入する（0 を正しく扱うために || を使わない）
+     if(parsed.hasOwnProperty('pts')) gameData.pts = Number(parsed.pts);
+     if(parsed.hasOwnProperty('xp')) gameData.xp = Number(parsed.xp);
+     if(parsed.hasOwnProperty('level')) gameData.level = Number(parsed.level);
+     if(parsed.hasOwnProperty('power')) gameData.power = Number(parsed.power);
+     if(parsed.hasOwnProperty('autoAmount')) gameData.autoAmount = Number(parsed.autoAmount);
+     if(parsed.hasOwnProperty('boostUntil')) gameData.boostUntil = Number(parsed.boostUntil);
+     if(parsed.hasOwnProperty('rebirth')) gameData.rebirth = Number(parsed.rebirth);
+     // 不足する場合は既定値を保持する
+   }catch(e){
+     console.log("セーブデータ読み込みエラー:", e);
+   }
+ }
 }
+
 
 
 const format = n => {
@@ -566,59 +565,6 @@ function performClick(e){
   updateDisplay();
 }
 
-// 3. 画面表示の更新（スコア表示も含める）
-function updateUI() {
-  // Gの表示
-  document.getElementById('pts').innerText = Math.floor(gameData.pts).toLocaleString();
-  
-  // スコア・ベストスコアの表示
-  document.getElementById('score-value').innerText = Math.floor(gameData.totalScore).toLocaleString();
-  document.getElementById('high-score-value').innerText = Math.floor(gameData.highScore).toLocaleString();
-  
-  // レベル・経験値の表示
-  document.getElementById('level').innerText = gameData.level;
-  const nextXp = gameData.level * 100;
-  const xpPercent = Math.min((gameData.xp / nextXp) * 100, 100);
-  document.getElementById('xp-bar').style.width = xpPercent + "%";
-  
-  // リボーン倍率
-  document.getElementById('rebirth-multiplier-top').innerText = (1 + gameData.rebirth * 0.5).toFixed(1);
-}
-
-// 4. クリック処理（ここが重要です！）
-function performClick(event) {
-  // 倍率計算
-  const multiplier = 1 + (gameData.rebirth || 0) * 0.5;
-  const gain = (gameData.power || 1) * multiplier;
-
-  // 加算処理（|| 0 を入れることでNaNエラーを防ぎます）
-  gameData.pts = (gameData.pts || 0) + gain;
-  gameData.totalScore = (gameData.totalScore || 0) + gain;
-
-  // ハイスコア更新
-  if (gameData.totalScore > gameData.highScore) {
-    gameData.highScore = gameData.totalScore;
-  }
-
-  // 経験値加算
-  gameData.xp += 1;
-  if (gameData.xp >= gameData.level * 100) {
-    gameData.xp = 0;
-    gameData.level++;
-    alert("レベルアップ！ Lv." + gameData.level);
-  }
-
-  updateUI();
-  saveGame(); // クリックごとにセーブ
-  
-  // 既存の演出関数（あれば）
-  if (typeof createRipple === 'function') createRipple(event);
-  if (typeof showGainText === 'function') showGainText(event, gain);
-}
-
-// 起動時にロード
-window.onload = loadGame;
-
 function startBoss(bossType = 'goblin'){
   bossData.currentBoss = bossType;
   const boss = bossData.bosses[bossType];
@@ -642,6 +588,7 @@ function startBoss(bossType = 'goblin'){
     if(bossData.time <= 0) endBoss(false);
   }, 1000);
 }
+
 
 function attackBoss(e){
   if(!bossData.active) return;
@@ -747,26 +694,6 @@ function drawGacha(){
   }, 1500);
 }
 
-function updateScore(amount) {
-  gameData.totalScore += amount;
-  
-  // ハイスコアを更新
-  if (gameData.totalScore > gameData.highScore) {
-    gameData.highScore = gameData.totalScore;
-  }
-  
-  // UIの更新
-  document.getElementById('score-value').innerText = Math.floor(gameData.totalScore).toLocaleString();
-  document.getElementById('high-score-value').innerText = Math.floor(gameData.highScore).toLocaleString();
-}
-
-// 例：クリック時に呼び出す
-function performClick(event) {
-  let gain = gameData.power * (1 + gameData.rebirth * 0.5);
-  gameData.pts += gain;
-  updateScore(gain); // ここでスコアも加算！
-  // ...既存の処理...
-}
 
 
 function buyItem(id, cost){
