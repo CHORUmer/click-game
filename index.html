@@ -451,10 +451,6 @@ function saveGame(){
   localStorage.setItem("clickerSave", JSON.stringify(gameData));
 }
 
-// 2. セーブ・ロード機能（エラーを防止する修正版）
-function saveGame() {
-  localStorage.setItem('rpgClickerSave', JSON.stringify(gameData));
-}
 
 function loadGame(){
  const s = localStorage.getItem("clickerSave");
